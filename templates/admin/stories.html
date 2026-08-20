@@ -1,0 +1,76 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Stories{% endblock %}
+{% block page_title %}📖 Stories{% endblock %}
+
+{% block content %}
+<div style="max-width:560px">
+
+  <div class="a-card mb-3">
+    <div class="a-card-header">
+      <div class="a-card-title">Upload Stories File</div>
+    </div>
+    <div class="a-card-body">
+      <p class="text-muted mb-3">
+        Upload an HTML or PDF file. This will replace the entire Stories page on the website —
+        visitors will see this file displayed full screen when they visit <code>/stories</code>.
+      </p>
+
+      {% if stories_file %}
+      <div style="background:rgba(90,158,111,.08);border:1px solid rgba(90,158,111,.2);
+                  border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;
+                  display:flex;align-items:center;gap:.75rem">
+        <span style="font-size:1.5rem">✅</span>
+        <div>
+          <div style="font-weight:600;color:var(--deep);font-size:.88rem">File currently uploaded</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">
+            Type: {{ stories_type | upper }}
+            &nbsp;·&nbsp;
+            <a href="{{ url_for('static', filename=stories_file) }}" target="_blank"
+               style="color:var(--accent)">Preview file ↗</a>
+            &nbsp;·&nbsp;
+            <a href="/stories" target="_blank" style="color:var(--accent)">View live page ↗</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div style="background:rgba(166,139,123,.08);border:1px solid rgba(166,139,123,.15);
+                  border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;
+                  display:flex;align-items:center;gap:.75rem">
+        <span style="font-size:1.5rem">📄</span>
+        <div style="font-size:.85rem;color:var(--muted)">No stories file uploaded yet. Upload one below.</div>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('admin_stories') }}" enctype="multipart/form-data">
+        <div class="a-form-group">
+          <label>{{ 'Replace' if stories_file else 'Upload' }} Stories File</label>
+          <input class="a-input" type="file" name="stories_file" accept=".html,.htm,.pdf" required/>
+          <div class="a-input-hint">Accepted formats: HTML (.html, .htm) or PDF (.pdf). Max 5 MB.</div>
+        </div>
+        <button type="submit" class="a-btn a-btn-primary">
+          {{ '🔄 Replace File' if stories_file else '⬆️ Upload File' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="a-card">
+    <div class="a-card-header"><div class="a-card-title">ℹ️ How it works</div></div>
+    <div class="a-card-body">
+      <div style="display:flex;flex-direction:column;gap:.65rem">
+        {% for tip in [
+          'Upload your stories as a designed HTML file or a PDF document',
+          'Once uploaded, visitors to /stories will see your file displayed full screen',
+          'Uploading a new file automatically replaces the old one',
+          'HTML files render with full styling; PDFs display in the browser\'s PDF viewer'
+        ] %}
+        <div style="display:flex;gap:.6rem;font-size:.84rem;color:var(--muted)">
+          <span style="color:var(--accent)">→</span><span>{{ tip }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

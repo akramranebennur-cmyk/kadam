@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Admin{% endblock %} — Kadam SOS Foundation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}"/>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="admin-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">👣 Kadam SOS</div>
+      <div class="sidebar-brand-sub">Admin Panel</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+        <span class="icon">🏠</span> Dashboard
+      </a>
+
+      <div class="sidebar-section-label">Content</div>
+      <a href="{{ url_for('admin_instagram') }}" class="sidebar-link {% if request.endpoint == 'admin_instagram' %}active{% endif %}">
+        <span class="icon">📸</span> Instagram URLs
+      </a>
+      <a href="{{ url_for('admin_stats') }}" class="sidebar-link {% if request.endpoint == 'admin_stats' %}active{% endif %}">
+        <span class="icon">📊</span> Site Stats
+      </a>
+      <a href="{{ url_for('admin_team') }}" class="sidebar-link {% if request.endpoint == 'admin_team' %}active{% endif %}">
+        <span class="icon">👥</span> Our Team
+      </a>
+      <a href="{{ url_for('admin_programs') }}" class="sidebar-link {% if request.endpoint == 'admin_programs' %}active{% endif %}">
+        <span class="icon">📋</span> Programs
+      </a>
+      <a href="{{ url_for('admin_stories') }}" class="sidebar-link {% if request.endpoint == 'admin_stories' %}active{% endif %}">
+        <span class="icon">📖</span> Stories
+      </a>
+      <a href="{{ url_for('admin_media') }}" class="sidebar-link {% if request.endpoint in ['admin_media','admin_hero_upload','admin_hero_delete','admin_story_card_upload','admin_story_card_delete','admin_story_card_edit'] %}active{% endif %}">
+        <span class="icon">🖼️</span> Media
+      </a>
+
+      <div class="sidebar-section-label">Forms</div>
+      <a href="{{ url_for('admin_volunteers') }}" class="sidebar-link {% if request.endpoint == 'admin_volunteers' %}active{% endif %}">
+        <span class="icon">🙋</span> Volunteer Apps
+        {% set unreviewed = state.volunteer_apps | selectattr('reviewed', 'equalto', false) | list | length %}
+        {% if unreviewed > 0 %}<span class="sidebar-badge">{{ unreviewed }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('admin_messages') }}" class="sidebar-link {% if request.endpoint == 'admin_messages' %}active{% endif %}">
+        <span class="icon">✉️</span> Contact Messages
+        {% set unread = state.contact_msgs | selectattr('read', 'equalto', false) | list | length %}
+        {% if unread > 0 %}<span class="sidebar-badge">{{ unread }}</span>{% endif %}
+      </a>
+
+      <div class="sidebar-section-label">Security</div>
+      <a href="{{ url_for('admin_change_password') }}" class="sidebar-link {% if request.endpoint in ['admin_change_password','admin_set_password'] %}active{% endif %}">
+        <span class="icon">🔑</span> Change Password
+      </a>
+      {% if session.get('admin_logged_in') == 'masterkey' %}
+      <a href="{{ url_for('admin_change_authcode') }}" class="sidebar-link {% if request.endpoint == 'admin_change_authcode' %}active{% endif %}" style="color:var(--accent)">
+        <span class="icon">👑</span> Change Auth Code
+      </a>
+      {% endif %}
+
+      <div class="sidebar-section-label">Website</div>
+      <a href="{{ url_for('home') }}" target="_blank" class="sidebar-link">
+        <span class="icon">🌐</span> View Website ↗
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{% if session.get('admin_logged_in') == 'masterkey' %}👑{% else %}👤{% endif %}</div>
+        <div>
+          <div class="sidebar-username">{{ session.get('admin_name', 'Admin') }}</div>
+          <div class="sidebar-role">{% if session.get('admin_logged_in') == 'masterkey' %}Masterkey Access{% else %}Regular Admin{% endif %}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('admin_logout') }}" class="sidebar-logout">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+        <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="topbar-date" id="topbar-date"></span>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+          <div class="a-alert a-alert-{{ 'success' if category == 'success' else 'error' }}">
+            {{ '✅' if category == 'success' else '❌' }} {{ message }}
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+</div>
+
+<script>
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'long', year:'numeric' });
+
+  const sidebar        = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const sidebarToggle  = document.getElementById('sidebar-toggle');
+
+  function openSidebar()  { sidebar.classList.add('open');    sidebarOverlay.classList.add('active');    document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+  sidebarToggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+  sidebarOverlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+  sidebar.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) closeSidebar(); });
+  });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

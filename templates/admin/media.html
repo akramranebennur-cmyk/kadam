@@ -1,0 +1,272 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Media{% endblock %}
+{% block page_title %}🖼️ Media Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+.media-section { margin-bottom: 2.5rem; }
+.media-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem; flex-wrap: wrap; gap: .75rem;
+}
+.media-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem; font-weight: 700; color: var(--deep);
+}
+.img-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .85rem;
+}
+.img-thumb-wrap {
+  position: relative; border-radius: 10px; overflow: hidden;
+  aspect-ratio: 1/1; background: var(--blush);
+  border: 1px solid rgba(166,139,123,.15);
+  group: true;
+}
+.img-thumb-wrap img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .3s;
+}
+.img-thumb-wrap:hover img { transform: scale(1.05); }
+.img-delete-btn {
+  position: absolute; top: .4rem; right: .4rem;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(192,80,77,.85); color: #fff;
+  border: none; cursor: pointer; font-size: .75rem;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .2s;
+}
+.img-thumb-wrap:hover .img-delete-btn { opacity: 1; }
+.img-empty {
+  border: 1.5px dashed rgba(166,139,123,.3);
+  border-radius: 10px; padding: 1.5rem;
+  text-align: center; color: var(--muted); font-size: .82rem;
+  grid-column: 1/-1;
+}
+
+/* Story card editor */
+.story-editor {
+  border: 1px solid rgba(166,139,123,.15);
+  border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem;
+}
+.story-editor-head {
+  background: var(--blush); padding: .85rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .5rem; flex-wrap: wrap;
+}
+.story-editor-label {
+  font-weight: 700; color: var(--deep); font-size: .9rem;
+}
+.story-editor-body { background: var(--white); padding: 1.25rem; }
+
+/* Modal */
+.modal-backdrop { position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.5);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto; }
+.modal-box { background:var(--white);border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:auto;box-shadow:0 24px 80px rgba(0,0,0,.3); }
+.modal-title { font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--deep);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid rgba(166,139,123,.15); }
+.modal-actions { display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ══════════════════════════════════════
+   HERO IMAGES
+══════════════════════════════════════ #}
+<div class="a-card media-section">
+  <div class="a-card-header">
+    <div class="a-card-title">🌄 Hero Carousel Images</div>
+    <button class="a-btn a-btn-primary a-btn-sm" type="button"
+            onclick="document.getElementById('modal-hero-upload').style.display='flex'">
+      + Upload Images
+    </button>
+  </div>
+  <div class="a-card-body">
+    <p class="text-muted mb-3" style="font-size:.82rem">
+      These images rotate automatically behind the hero section on the home page.
+      Upload landscape images (min 1600×900px) for best results.
+      Current count: <strong>{{ hero_images | length }}</strong>
+    </p>
+    <div class="img-grid">
+      {% if hero_images %}
+        {% for img in hero_images %}
+        <div class="img-thumb-wrap">
+          <img src="{{ url_for('static', filename=img) }}" alt="Hero image {{ loop.index }}"/>
+          <form method="POST" action="{{ url_for('admin_hero_delete') }}"
+                onsubmit="return confirm('Remove this hero image?')">
+            <input type="hidden" name="image" value="{{ img }}"/>
+            <button class="img-delete-btn" type="submit" title="Remove">✕</button>
+          </form>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="img-empty">
+          <div style="font-size:2rem;margin-bottom:.5rem;opacity:.4">🌄</div>
+          No hero images uploaded yet. Upload some to start the carousel.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+{# ══════════════════════════════════════
+   STORY CARDS
+══════════════════════════════════════ #}
+<div class="a-card">
+  <div class="a-card-header">
+    <div class="a-card-title">📰 Home Page Story Cards</div>
+  </div>
+  <div class="a-card-body">
+    <p class="text-muted mb-3" style="font-size:.82rem">
+      The 3 story cards on the home page. Each card has its own rotating image carousel.
+      Upload square or portrait images (min 600×700px) for best results.
+    </p>
+
+    {% for card in story_cards %}
+    <div class="story-editor">
+      <div class="story-editor-head">
+        <div class="story-editor-label">Card {{ loop.index }} — {{ card.tag }}</div>
+        <div class="flex-gap">
+          <button class="a-btn a-btn-ghost a-btn-sm" type="button"
+            onclick="openEditCard({{ loop.index0 }}, {{ card | tojson }})">
+            ✏️ Edit Text
+          </button>
+          <button class="a-btn a-btn-primary a-btn-sm" type="button"
+            onclick="openUploadCard({{ loop.index0 }}, '{{ card.tag | e }}')">
+            + Upload Images
+          </button>
+        </div>
+      </div>
+      <div class="story-editor-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div>
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem">Title</div>
+            <div style="font-size:.88rem;color:var(--deep);font-weight:600">{{ card.title }}</div>
+          </div>
+          <div>
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem">Excerpt</div>
+            <div style="font-size:.82rem;color:var(--muted);line-height:1.5">{{ card.excerpt[:80] }}{% if card.excerpt|length > 80 %}…{% endif %}</div>
+          </div>
+        </div>
+        <div class="img-grid">
+          {% if card.images %}
+            {% for img in card.images %}
+            <div class="img-thumb-wrap">
+              <img src="{{ url_for('static', filename=img) }}" alt="Card {{ loop.index }} image"/>
+              <form method="POST" action="{{ url_for('admin_story_card_delete', card_idx=loop.index0) }}"
+                    onsubmit="return confirm('Remove this image?')">
+                <input type="hidden" name="image" value="{{ img }}"/>
+                <button class="img-delete-btn" type="submit" title="Remove">✕</button>
+              </form>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="img-empty">
+              <div style="font-size:1.5rem;margin-bottom:.35rem;opacity:.4">📷</div>
+              No images yet. Click "+ Upload Images" to add some.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+{# ══════════════════════════════════════
+   MODALS
+══════════════════════════════════════ #}
+
+{# Hero Upload #}
+<div id="modal-hero-upload" style="display:none" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-title">Upload Hero Images</div>
+    <form method="POST" action="{{ url_for('admin_hero_upload') }}" enctype="multipart/form-data">
+      <div class="a-form-group">
+        <label>Select Images (multiple allowed)</label>
+        <input class="a-input" type="file" name="images" accept="image/*" multiple required/>
+        <div class="a-input-hint">JPG, PNG, WebP. Landscape format recommended (16:9). Max 5MB each.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary">Upload</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-hero-upload').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# Story Card Upload #}
+<div id="modal-card-upload" style="display:none" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-title" id="card-upload-title">Upload Card Images</div>
+    <form id="form-card-upload" method="POST" action="" enctype="multipart/form-data">
+      <div class="a-form-group">
+        <label>Select Images (multiple allowed)</label>
+        <input class="a-input" type="file" name="images" accept="image/*" multiple required/>
+        <div class="a-input-hint">JPG, PNG, WebP. Square or portrait format. Max 5MB each.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary">Upload</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-card-upload').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# Story Card Edit Text #}
+<div id="modal-card-edit" style="display:none" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-title" id="card-edit-title">Edit Story Card</div>
+    <form id="form-card-edit" method="POST" action="">
+      <div class="a-form-group">
+        <label>Tag / Category</label>
+        <input class="a-input" type="text" name="tag" id="ce-tag" placeholder="e.g. Education"/>
+      </div>
+      <div class="a-form-group">
+        <label>Title</label>
+        <input class="a-input" type="text" name="title" id="ce-title" placeholder="Card headline"/>
+      </div>
+      <div class="a-form-group">
+        <label>Excerpt</label>
+        <textarea class="a-input" name="excerpt" id="ce-excerpt" rows="3"
+                  placeholder="Short description shown on the card…" style="resize:vertical"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary">Save</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-card-edit').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.modal-backdrop').forEach(function(el) {
+  el.addEventListener('click', function(e) { if(e.target===el) el.style.display='none'; });
+});
+document.addEventListener('keydown', function(e) {
+  if(e.key==='Escape') document.querySelectorAll('.modal-backdrop').forEach(function(el){ el.style.display='none'; });
+});
+
+function openUploadCard(idx, tagName) {
+  document.getElementById('card-upload-title').textContent = 'Upload Images — ' + tagName;
+  document.getElementById('form-card-upload').action = '/admin/media/story/' + idx + '/upload';
+  document.getElementById('modal-card-upload').style.display = 'flex';
+}
+
+function openEditCard(idx, card) {
+  document.getElementById('card-edit-title').textContent = 'Edit Card ' + (idx+1) + ' — ' + card.tag;
+  document.getElementById('form-card-edit').action = '/admin/media/story/' + idx + '/edit';
+  document.getElementById('ce-tag').value     = card.tag     || '';
+  document.getElementById('ce-title').value   = card.title   || '';
+  document.getElementById('ce-excerpt').value = card.excerpt || '';
+  document.getElementById('modal-card-edit').style.display = 'flex';
+}
+</script>
+{% endblock %}

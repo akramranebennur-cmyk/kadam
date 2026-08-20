@@ -1,0 +1,56 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Site Stats{% endblock %}
+{% block page_title %}📊 Site Stats Editor{% endblock %}
+{% block content %}
+
+<div style="max-width:600px">
+  <div class="a-card">
+    <div class="a-card-header">
+      <div class="a-card-title">Edit Homepage Stats</div>
+    </div>
+    <div class="a-card-body">
+      <p class="text-muted mb-3">
+        These numbers are displayed in the stats bar on the homepage. Update them whenever your impact grows!
+      </p>
+      <form method="POST" action="{{ url_for('admin_stats') }}">
+        <div class="grid-2">
+          {# FIX: All four stat fields are present and match app.py #}
+          {% for field,label,icon in [
+            ('cities',  'Cities Active',       '🌐'),
+            ('events',  'Events & Activities', '📅'),
+            ('members', 'Community Members',   '👥'),
+            ('causes',  'Cause Areas',         '🎯')
+          ] %}
+          <div class="a-form-group">
+            <label>{{ icon }} {{ label }}</label>
+            <input class="a-input" type="number" name="{{ field }}"
+                   value="{{ stats[field] }}" min="0" required/>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="a-btn a-btn-primary" style="margin-top:.5rem">💾 Save Stats</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="a-card mt-3">
+    <div class="a-card-header"><div class="a-card-title">Current Display</div></div>
+    <div class="a-card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        {% for field,label,icon in [
+          ('cities', 'Cities', '🌐'),
+          ('events', 'Events', '📅'),
+          ('members','Members','👥'),
+          ('causes', 'Causes', '🎯')
+        ] %}
+        <div style="text-align:center;padding:1rem;background:var(--blush);border-radius:10px">
+          <div style="font-size:1.5rem">{{ icon }}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--deep)">{{ stats[field] }}+</div>
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">{{ label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

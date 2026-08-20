@@ -1,0 +1,54 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Change Auth Code{% endblock %}
+{% block page_title %}👑 Change Auth Code{% endblock %}
+{% block content %}
+<div style="max-width:460px">
+  <div class="master-banner">
+    <div class="master-banner-icon">👑</div>
+    <div class="master-banner-text">
+      This section is only accessible via <strong>Masterkey login</strong>.
+      The Auth Code controls who can change the regular admin password.
+    </div>
+  </div>
+
+  <div class="a-card">
+    <div class="a-card-header"><div class="a-card-title">Set New Auth Code</div></div>
+    <div class="a-card-body">
+      {% if error %}
+      <div class="a-alert a-alert-error">❌ {{ error }}</div>
+      {% endif %}
+      <form method="POST" action="{{ url_for('admin_change_authcode') }}">
+        <div class="a-form-group">
+          <label>New Auth Code</label>
+          <input class="a-input" type="text" name="new_auth_code"
+                 placeholder="Minimum 6 characters" required autofocus/>
+          <div class="a-input-hint">Share this only with trusted senior admins.</div>
+        </div>
+        <div class="a-form-group">
+          <label>Confirm Auth Code</label>
+          <input class="a-input" type="text" name="confirm_auth_code"
+                 placeholder="Re-enter auth code" required/>
+        </div>
+        <button type="submit" class="a-btn a-btn-dark">Update Auth Code →</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="a-card mt-3">
+    <div class="a-card-header"><div class="a-card-title">Security Reminder</div></div>
+    <div class="a-card-body">
+      <div style="display:flex;flex-direction:column;gap:.6rem">
+        {% for tip in [
+          'The auth code is separate from the masterkey — never share them together',
+          'Change the auth code if you suspect it has been compromised',
+          'The masterkey is recalculated daily and is never stored anywhere'
+        ] %}
+        <div style="font-size:.85rem;color:var(--muted);display:flex;gap:.5rem">
+          <span>🔐</span><span>{{ tip }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

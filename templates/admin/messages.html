@@ -1,0 +1,78 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Contact Messages{% endblock %}
+{% block page_title %}✉️ Contact Messages{% endblock %}
+{% block content %}
+
+<div class="flex-between mb-3">
+  <div>
+    <span class="pill pill-orange" style="font-size:.8rem">
+      {{ msgs | selectattr('read', 'equalto', false) | list | length }} unread
+    </span>
+    &nbsp;
+    <span class="pill pill-green" style="font-size:.8rem">
+      {{ msgs | selectattr('read', 'equalto', true) | list | length }} read
+    </span>
+  </div>
+  <span style="font-size:.82rem;color:var(--muted)">Total: {{ msgs | length }} messages</span>
+</div>
+
+{% if msgs %}
+<div style="display:flex;flex-direction:column;gap:1rem">
+  {% for msg in msgs %}
+  <div class="a-card {% if not msg.read %}unread-card{% endif %}" id="msg-card-{{ msg.id }}"
+       style="border-left:3px solid {% if not msg.read %}var(--accent){% else %}transparent{% endif %}">
+    <div class="a-card-header" style="padding:1rem 1.25rem">
+      <div>
+        <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <strong style="color:var(--deep)">{{ msg.name }}</strong>
+          <a href="mailto:{{ msg.email }}" style="color:var(--accent);font-size:.85rem">{{ msg.email }}</a>
+          {% if not msg.read %}<span class="pill pill-orange" style="font-size:.68rem">New</span>{% endif %}
+        </div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.25rem">
+          📌 {{ msg.subject }} &nbsp;·&nbsp; 🕐 {{ msg.timestamp }}
+        </div>
+      </div>
+      <div class="flex-gap">
+        <button class="a-btn a-btn-ghost a-btn-sm" onclick="toggleRead({{ msg.id }})">
+          {% if msg.read %}Mark Unread{% else %}Mark Read{% endif %}
+        </button>
+        <a href="mailto:{{ msg.email }}?subject=Re: {{ msg.subject }}" class="a-btn a-btn-primary a-btn-sm">Reply ↗</a>
+        <button class="a-btn a-btn-danger a-btn-sm" onclick="deleteMsg({{ msg.id }})">🗑</button>
+      </div>
+    </div>
+    <div class="a-card-body" style="padding:.75rem 1.25rem 1.25rem">
+      <p style="font-size:.9rem;color:var(--muted);line-height:1.7">{{ msg.message }}</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="a-card">
+  <div class="empty-state">
+    <div class="empty-state-icon">✉️</div>
+    <p>No contact messages yet. They'll appear here when people submit the contact form.</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+{% block extra_js %}
+<script>
+async function toggleRead(id) {
+  const res = await fetch(`/admin/messages/${id}/read`, { method: 'POST' });
+  const data = await res.json();
+  if (data.success) location.reload();
+}
+async function deleteMsg(id) {
+  if (!confirm('Delete this message? This cannot be undone.')) return;
+  const res = await fetch(`/admin/messages/${id}/delete`, { method: 'POST' });
+  const data = await res.json();
+  if (data.success) {
+    const card = document.getElementById(`msg-card-${id}`);
+    card.style.opacity = '0'; card.style.transition = 'opacity .3s';
+    setTimeout(() => card.remove(), 300);
+  }
+}
+</script>
+{% endblock %}

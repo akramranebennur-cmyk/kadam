@@ -1,0 +1,105 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Volunteer Applications{% endblock %}
+{% block page_title %}🙋 Volunteer Applications{% endblock %}
+{% block content %}
+
+<div class="flex-between mb-3">
+  <div>
+    <span class="pill pill-orange" style="font-size:.8rem">
+      {{ apps | selectattr('reviewed', 'equalto', false) | list | length }} pending review
+    </span>
+    &nbsp;
+    <span class="pill pill-green" style="font-size:.8rem">
+      {{ apps | selectattr('reviewed', 'equalto', true) | list | length }} reviewed
+    </span>
+  </div>
+  <span style="font-size:.82rem;color:var(--muted)">Total: {{ apps | length }} applications</span>
+</div>
+
+{% if apps %}
+<div class="a-card">
+  <div class="a-table-wrap">
+    <table class="a-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>City</th>
+          <th>Cause</th>
+          <th>Message</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in apps %}
+        <tr id="vol-row-{{ app.id }}">
+          <td style="color:var(--muted)">{{ app.id }}</td>
+          <td><strong>{{ app.name }}</strong></td>
+          <td>
+            <a href="mailto:{{ app.email }}" style="color:var(--accent)">{{ app.email }}</a>
+          </td>
+          <td>{{ app.city }}</td>
+          <td><span class="pill pill-muted">{{ app.cause }}</span></td>
+          <td>
+            {% if app.message %}
+            <span class="truncate" title="{{ app.message }}" style="max-width:180px;display:block">
+              {{ app.message }}
+            </span>
+            {% else %}
+            <span style="color:var(--muted);font-style:italic">—</span>
+            {% endif %}
+          </td>
+          <td style="white-space:nowrap;color:var(--muted);font-size:.8rem">{{ app.timestamp }}</td>
+          <td>
+            <span class="pill {% if app.reviewed %}pill-green{% else %}pill-orange{% endif %}" id="vol-status-{{ app.id }}">
+              {% if app.reviewed %}✅ Reviewed{% else %}⏳ Pending{% endif %}
+            </span>
+          </td>
+          <td>
+            <div class="flex-gap">
+              <button class="a-btn a-btn-ghost a-btn-sm" onclick="toggleReview({{ app.id }})">
+                {% if app.reviewed %}Unmark{% else %}Mark Reviewed{% endif %}
+              </button>
+              <button class="a-btn a-btn-danger a-btn-sm" onclick="deleteVol({{ app.id }})">🗑</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="a-card">
+  <div class="empty-state">
+    <div class="empty-state-icon">🙋</div>
+    <p>No volunteer applications yet. They'll appear here when people submit the form.</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+{% block extra_js %}
+<script>
+async function toggleReview(id) {
+  const res = await fetch(`/admin/volunteers/${id}/review`, { method: 'POST' });
+  const data = await res.json();
+  if (data.success) location.reload();
+}
+async function deleteVol(id) {
+  if (!confirm('Delete this application? This cannot be undone.')) return;
+  const res = await fetch(`/admin/volunteers/${id}/delete`, { method: 'POST' });
+  const data = await res.json();
+  if (data.success) {
+    const row = document.getElementById(`vol-row-${id}`);
+    row.style.opacity = '0';
+    row.style.transition = 'opacity .3s';
+    setTimeout(() => row.remove(), 300);
+  }
+}
+</script>
+{% endblock %}

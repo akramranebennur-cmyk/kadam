@@ -1,0 +1,82 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Instagram Posts{% endblock %}
+{% block page_title %}📸 Instagram Posts{% endblock %}
+{% block content %}
+
+<div style="max-width:700px">
+  <div class="a-card mb-3">
+    <div class="a-card-header">
+      <div class="a-card-title">Configure 3 Instagram Posts</div>
+    </div>
+    <div class="a-card-body">
+      <p class="text-muted mb-3">
+        For each post: enter the Instagram link, a display name, and upload a thumbnail image.
+        The thumbnail and name will be shown on the website — clicking opens the Instagram post.
+      </p>
+      <form method="POST" action="{{ url_for('admin_instagram') }}" enctype="multipart/form-data">
+        {% for i in range(1, 4) %}
+        {% set p = posts[i-1] if posts|length >= i else {"url":"","name":"","thumbnail":""} %}
+        <div style="border:1px solid rgba(166,139,123,.15);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;background:var(--cream)">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--deep);color:var(--blush);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0">{{ i }}</div>
+            <div style="font-weight:600;color:var(--deep);font-size:.9rem">Post {{ i }}</div>
+            {% if p.thumbnail %}
+            <img src="{{ url_for('static', filename=p.thumbnail) }}" alt="" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:2px solid var(--blush);margin-left:auto"/>
+            {% endif %}
+          </div>
+
+          <div class="a-form-group">
+            <label>Instagram Post URL</label>
+            <input class="a-input" type="url" name="url{{ i }}"
+                   value="{{ p.url }}" placeholder="https://www.instagram.com/p/…/"/>
+          </div>
+          <div class="a-form-group">
+            <label>Display Name / Caption</label>
+            <input class="a-input" type="text" name="name{{ i }}"
+                   value="{{ p.name }}" placeholder="e.g. Education Drive — Bhopal"/>
+          </div>
+          <div class="a-form-group" style="margin-bottom:0">
+            <label>Thumbnail Image <span style="font-weight:400;color:var(--muted)">(leave blank to keep current)</span></label>
+            <input class="a-input" type="file" name="thumbnail_{{ i }}" accept="image/*"
+                   onchange="prevIG(this, 'ig-prev-{{ i }}')"/>
+            <img id="ig-prev-{{ i }}" src="" alt="" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--blush);display:none;margin-top:.5rem"/>
+            <div class="a-input-hint">JPG, PNG, WebP — recommended square, min 400×400px</div>
+          </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="a-btn a-btn-primary">💾 Save Posts</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="a-card">
+    <div class="a-card-header"><div class="a-card-title">How It Works</div></div>
+    <div class="a-card-body">
+      <div style="display:flex;flex-direction:column;gap:.65rem">
+        {% for tip in [
+          'Upload a square thumbnail screenshot of your Instagram post',
+          'Enter the post\'s Instagram URL — this opens when someone clicks the thumbnail',
+          'The display name appears below the thumbnail on the website',
+          'All three posts appear in the "Latest from Instagram" section on the home page'
+        ] %}
+        <div style="display:flex;gap:.6rem;font-size:.84rem;color:var(--muted)">
+          <span style="color:var(--accent)">→</span><span>{{ tip }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script>
+function prevIG(input, prevId) {
+  var img = document.getElementById(prevId);
+  if (!img || !input.files || !input.files[0]) return;
+  img.src = URL.createObjectURL(input.files[0]);
+  img.style.display = 'block';
+}
+</script>
+{% endblock %}

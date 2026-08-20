@@ -1,0 +1,773 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Our Team{% endblock %}
+{% block page_title %}👥 Our Team{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══ MODALS ══ */
+.modal-backdrop {
+  position:fixed; inset:0; z-index:999;
+  background:rgba(0,0,0,0.55);
+  align-items:flex-start; justify-content:center;
+  padding:2rem 1rem; overflow-y:auto;
+}
+.modal-box {
+  background:var(--white); border-radius:16px; padding:2rem;
+  width:100%; max-width:500px; margin:auto;
+  box-shadow:0 24px 80px rgba(0,0,0,0.3);
+  animation:modalPop .22s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes modalPop {
+  from{opacity:0;transform:translateY(16px);}
+  to  {opacity:1;transform:translateY(0);}
+}
+.modal-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.25rem; font-weight:700; color:var(--deep);
+  margin-bottom:1.25rem; padding-bottom:.75rem;
+  border-bottom:1px solid rgba(166,139,123,.15);
+}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.5rem;flex-wrap:wrap;}
+
+/* ══ MEMBER ROWS ══ */
+.member-row {
+  display:flex; align-items:center; gap:.85rem;
+  padding:.7rem 1.25rem;
+  border-bottom:1px solid rgba(166,139,123,.08);
+  transition:background .15s;
+}
+.member-row:last-child{border-bottom:none;}
+.member-row:hover{background:rgba(250,245,242,.7);}
+.member-thumb {
+  width:38px; height:38px; border-radius:50%;
+  background:var(--blush); overflow:hidden; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; border:2px solid rgba(166,139,123,.2);
+}
+.member-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.member-info{flex:1;min-width:0;}
+.member-name{font-weight:600;color:var(--deep);font-size:.87rem;}
+.member-role-tag{
+  display:inline-block;font-size:.67rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-top:.1rem;
+}
+.move-col{display:flex;flex-direction:column;gap:2px;}
+.move-btn{
+  width:20px;height:18px;border-radius:3px;
+  border:1px solid rgba(166,139,123,.3);background:var(--white);
+  cursor:pointer;font-size:.58rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.move-btn:hover{background:var(--blush);}
+
+/* ══ BRANCH CARDS ══ */
+.branch-card {
+  background:var(--white);
+  border:1px solid rgba(166,139,123,.18);
+  border-radius:14px; margin-bottom:1.25rem;
+  box-shadow:0 2px 16px rgba(61,34,24,.06); overflow:hidden;
+}
+.branch-card-header {
+  background:linear-gradient(135deg,var(--deep) 0%,#5C3526 100%);
+  padding:1rem 1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:.5rem;flex-wrap:wrap;
+}
+.branch-card-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.1rem;font-weight:700;color:var(--blush);
+}
+.branch-card-meta{font-size:.72rem;color:rgba(245,230,223,.55);margin-top:.15rem;}
+.branch-section{border-top:1px solid rgba(166,139,123,.1);}
+.branch-section:first-child{border-top:none;}
+.branch-section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.65rem 1.25rem;
+  background:rgba(250,245,242,.6);
+  border-bottom:1px solid rgba(166,139,123,.08);
+}
+.branch-section-label{
+  font-size:.65rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:.4rem;
+}
+.empty-row{padding:.6rem 1.25rem;font-size:.8rem;color:var(--muted);font-style:italic;}
+
+/* ══ SOCIAL SLOT ══ */
+.social-slot{
+  border:1px solid rgba(166,139,123,.2);
+  border-radius:10px;padding:1rem;margin-bottom:.85rem;
+  background:var(--cream);
+}
+.social-slot-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.85rem;
+}
+.social-slot-label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+
+/* Toggle */
+.toggle-wrap{display:flex;align-items:center;gap:.5rem;}
+.toggle-label{font-size:.72rem;color:var(--muted);}
+.toggle{position:relative;display:inline-block;width:36px;height:20px;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{
+  position:absolute;cursor:pointer;inset:0;
+  background:rgba(166,139,123,.3);border-radius:20px;transition:.25s;
+}
+.toggle-slider:before{
+  content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;
+  background:var(--white);border-radius:50%;transition:.25s;
+}
+.toggle input:checked + .toggle-slider{background:var(--accent);}
+.toggle input:checked + .toggle-slider:before{transform:translateX(16px);}
+
+/* Platform grid */
+.platform-select-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.75rem;
+}
+.platform-btn{
+  display:flex;flex-direction:column;align-items:center;
+  gap:.25rem;padding:.5rem .25rem;border-radius:8px;
+  border:2px solid rgba(166,139,123,.2);background:var(--white);
+  cursor:pointer;transition:border-color .15s,background .15s;
+  font-size:.6rem;color:var(--muted);font-weight:600;
+}
+.platform-btn:hover{border-color:var(--accent);background:var(--blush);}
+.platform-btn.selected{border-color:var(--accent);background:rgba(196,149,106,.12);color:var(--accent);}
+.platform-btn svg{width:22px;height:22px;}
+
+/* Photo row */
+.photo-toggle-row{
+  display:flex;align-items:center;gap:1rem;
+  padding:.75rem;background:var(--cream);border-radius:10px;
+  margin-bottom:.85rem;border:1px solid rgba(166,139,123,.15);
+}
+.photo-preview{
+  width:56px;height:56px;border-radius:50%;
+  object-fit:cover;border:2px solid var(--blush);display:none;
+}
+.section-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.section-heading{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;color:var(--deep);}
+</style>
+{% endblock %}
+
+
+{# ═══════════════════════════════════════════
+   MACROS — defined here, before block content
+═══════════════════════════════════════════ #}
+
+{% macro platform_svg(key) %}
+{% if key == 'instagram' %}
+<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ig{{ key }}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs>
+  <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig{{ key }})"/>
+  <circle cx="12" cy="12" r="4" stroke="url(#ig{{ key }})"/>
+  <circle cx="17.5" cy="6.5" r="1" fill="#dc2743"/>
+</svg>
+{% elif key == 'linkedin' %}
+<svg viewBox="0 0 24 24" fill="#0A66C2" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/>
+  <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+</svg>
+{% elif key == 'twitter' %}
+<svg viewBox="0 0 24 24" fill="#000" xmlns="http://www.w3.org/2000/svg">
+  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+</svg>
+{% elif key == 'youtube' %}
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#FF0000" d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+  <polygon fill="#fff" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+</svg>
+{% elif key == 'facebook' %}
+<svg viewBox="0 0 24 24" fill="#1877F2" xmlns="http://www.w3.org/2000/svg">
+  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+</svg>
+{% elif key == 'whatsapp' %}
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+  <path fill="#25D366" d="M12 2C6.477 2 2 6.477 2 12c0 1.762.46 3.418 1.268 4.862L2 22l5.293-1.254A9.954 9.954 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.946 7.946 0 0 1-4.073-1.119l-.292-.174-3.138.742.796-3.03-.19-.311A7.948 7.948 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/>
+</svg>
+{% elif key == 'website' %}
+<svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="10"/>
+  <line x1="2" y1="12" x2="22" y2="12"/>
+  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+</svg>
+{% else %}
+<svg viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="10"/>
+  <line x1="12" y1="8" x2="12" y2="12"/>
+  <line x1="12" y1="16" x2="12.01" y2="16"/>
+</svg>
+{% endif %}
+{% endmacro %}
+
+
+{% macro member_form_fields(prefix) %}
+{% set platforms = [
+  ('instagram','Instagram'),('linkedin','LinkedIn'),('twitter','Twitter/X'),
+  ('youtube','YouTube'),('facebook','Facebook'),('whatsapp','WhatsApp'),
+  ('website','Website'),('other','Other')
+] %}
+<div class="a-form-group">
+  <label>Full Name *</label>
+  <input class="a-input" type="text" name="name" id="{{ prefix }}-name" placeholder="e.g. Prachi Dwivedi" required/>
+</div>
+<div class="a-form-group">
+  <label>Role / Title</label>
+  <input class="a-input" type="text" name="role" id="{{ prefix }}-role" placeholder="e.g. Founder, City Head"/>
+</div>
+<div class="a-form-group">
+  <label>Bio</label>
+  <textarea class="a-input" name="bio" id="{{ prefix }}-bio" rows="2" placeholder="Short description…" style="resize:vertical"></textarea>
+</div>
+
+{# Photo #}
+<div class="photo-toggle-row">
+  <img class="photo-preview" id="{{ prefix }}-photo-prev" src="" alt=""/>
+  <div style="flex:1">
+    <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:.35rem">Photo</label>
+    <input class="a-input" type="file" name="photo" accept="image/*"
+           onchange="showPreview(this,'{{ prefix }}-photo-prev')" style="margin-bottom:.5rem"/>
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" name="photo_visible" value="1" id="{{ prefix }}-photo-vis" checked/>
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label">Show photo on website</span>
+    </div>
+  </div>
+</div>
+
+{# Social slot 1 #}
+<div class="social-slot">
+  <div class="social-slot-header">
+    <div class="social-slot-label">Social Link 1</div>
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" name="social_1_visible" value="1" id="{{ prefix }}-s1-vis" checked/>
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label">Show on website</span>
+    </div>
+  </div>
+  <div class="platform-select-grid">
+    {% for key, name in platforms %}
+    <button type="button" class="platform-btn" id="{{ prefix }}-s1-{{ key }}"
+            onclick="selectPlatform('{{ prefix }}',1,'{{ key }}')">
+      {{ platform_svg(key) }}<span>{{ name }}</span>
+    </button>
+    {% endfor %}
+  </div>
+  <input type="hidden" name="social_1_platform" id="{{ prefix }}-s1-platform" value=""/>
+  <div class="a-form-group" style="margin-bottom:.5rem">
+    <label>Full URL</label>
+    <input class="a-input" type="text" name="social_1_url" id="{{ prefix }}-s1-url" placeholder="https://instagram.com/yourhandle"/>
+  </div>
+  <div class="a-form-group" style="margin-bottom:0">
+    <label>Display Name / Handle</label>
+    <input class="a-input" type="text" name="social_1_handle" id="{{ prefix }}-s1-handle" placeholder="@yourhandle"/>
+  </div>
+</div>
+
+{# Social slot 2 #}
+<div class="social-slot">
+  <div class="social-slot-header">
+    <div class="social-slot-label">Social Link 2</div>
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" name="social_2_visible" value="1" id="{{ prefix }}-s2-vis" checked/>
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label">Show on website</span>
+    </div>
+  </div>
+  <div class="platform-select-grid">
+    {% for key, name in platforms %}
+    <button type="button" class="platform-btn" id="{{ prefix }}-s2-{{ key }}"
+            onclick="selectPlatform('{{ prefix }}',2,'{{ key }}')">
+      {{ platform_svg(key) }}<span>{{ name }}</span>
+    </button>
+    {% endfor %}
+  </div>
+  <input type="hidden" name="social_2_platform" id="{{ prefix }}-s2-platform" value=""/>
+  <div class="a-form-group" style="margin-bottom:.5rem">
+    <label>Full URL</label>
+    <input class="a-input" type="text" name="social_2_url" id="{{ prefix }}-s2-url" placeholder="https://linkedin.com/in/yourname"/>
+  </div>
+  <div class="a-form-group" style="margin-bottom:0">
+    <label>Display Name / Handle</label>
+    <input class="a-input" type="text" name="social_2_handle" id="{{ prefix }}-s2-handle" placeholder="Your Name on LinkedIn"/>
+  </div>
+</div>
+{% endmacro %}
+
+
+{% block content %}
+
+{# ═══════════════════════════════════════════
+   KADAM SOS FOUNDATION — Main Body
+═══════════════════════════════════════════ #}
+<div class="a-card mb-3">
+  <div class="a-card-header">
+    <div class="a-card-title">🏛️ Kadam SOS Foundation — Main Body</div>
+    <button class="a-btn a-btn-primary a-btn-sm"
+            onclick="document.getElementById('modal-add-main').style.display='flex'">
+      + Add Member
+    </button>
+  </div>
+
+  {% if main_members %}
+  <div>
+    {% for m in main_members %}
+    <div class="member-row">
+      <div class="move-col">
+        <form method="POST" action="{{ url_for('admin_move_main_member', mid=m.id, direction='up') }}">
+          <button class="move-btn" type="submit" title="Move up">▲</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin_move_main_member', mid=m.id, direction='down') }}">
+          <button class="move-btn" type="submit" title="Move down">▼</button>
+        </form>
+      </div>
+      <div class="member-thumb">
+        {% if m.photo and m.get('photo_visible', true) %}
+          <img src="{{ url_for('static', filename=m.photo) }}" alt="{{ m.name }}"/>
+        {% else %}👤{% endif %}
+      </div>
+      <div class="member-info">
+        <div class="member-name">{{ m.name }}</div>
+        {% if m.role %}<div class="member-role-tag">{{ m.role }}</div>{% endif %}
+      </div>
+      <div class="flex-gap">
+        <button class="a-btn a-btn-ghost a-btn-sm" type="button"
+          onclick="openEditMain(this)"
+          data-id="{{ m.id }}"
+          data-name="{{ m.name | e }}"
+          data-role="{{ m.role | e }}"
+          data-bio="{{ m.bio | e }}"
+          data-photo="{{ m.photo | e }}"
+          data-photo-visible="{{ '1' if m.get('photo_visible', true) else '0' }}"
+          data-socials="{{ m.get('socials', []) | tojson | e }}">
+          ✏️ Edit
+        </button>
+        <form method="POST" action="{{ url_for('admin_delete_main_member', mid=m.id) }}"
+              onsubmit="return confirm('Delete {{ m.name | e }}?')">
+          <button class="a-btn a-btn-danger a-btn-sm" type="submit">🗑</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:2rem">
+    <div class="empty-state-icon">👤</div>
+    <p>No members yet. Click "+ Add Member" to add the first one.</p>
+  </div>
+  {% endif %}
+</div>
+
+
+{# ═══════════════════════════════════════════
+   BRANCHES
+═══════════════════════════════════════════ #}
+<div class="section-row">
+  <div class="section-heading">🗺️ Branches</div>
+  <button class="a-btn a-btn-primary a-btn-sm"
+          onclick="document.getElementById('modal-add-branch').style.display='flex'">
+    + Add Branch
+  </button>
+</div>
+
+{% if branches %}
+  {% for b in branches %}
+  <div class="branch-card" id="branch-card-{{ b.id }}">
+
+    <div class="branch-card-header">
+      <div>
+        <div class="branch-card-name">📍 {{ b.name }}</div>
+        <div class="branch-card-meta">{{ b.city }} &nbsp;·&nbsp; {{ b.lat }}, {{ b.lng }}</div>
+      </div>
+      <div class="flex-gap">
+        <div style="display:flex;gap:3px">
+          <form method="POST" action="{{ url_for('admin_move_branch', bid=b.id, direction='up') }}" style="display:inline">
+            <button class="move-btn" type="submit"
+              style="background:rgba(245,230,223,.15);border-color:rgba(245,230,223,.3)">▲</button>
+          </form>
+          <form method="POST" action="{{ url_for('admin_move_branch', bid=b.id, direction='down') }}" style="display:inline">
+            <button class="move-btn" type="submit"
+              style="background:rgba(245,230,223,.15);border-color:rgba(245,230,223,.3)">▼</button>
+          </form>
+        </div>
+        <button class="a-btn a-btn-sm" type="button"
+          style="background:rgba(245,230,223,.15);color:var(--blush);border:1px solid rgba(245,230,223,.3)"
+          onclick="openEditBranch(this)"
+          data-id="{{ b.id }}"
+          data-name="{{ b.name | e }}"
+          data-city="{{ b.city | e }}"
+          data-lat="{{ b.lat }}"
+          data-lng="{{ b.lng }}">✏️ Edit</button>
+        <form method="POST" action="{{ url_for('admin_delete_branch', bid=b.id) }}"
+              onsubmit="return confirm('Delete branch {{ b.name | e }} and ALL its members?')">
+          <button class="a-btn a-btn-danger a-btn-sm" type="submit">🗑 Delete</button>
+        </form>
+      </div>
+    </div>
+
+    <div>
+      {# Board Members #}
+      <div class="branch-section">
+        <div class="branch-section-head">
+          <div class="branch-section-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Board Members
+          </div>
+          <button class="a-btn a-btn-ghost a-btn-sm" type="button"
+            onclick="openAddBranchMember('{{ b.id }}','board','{{ b.name | e }}')">+ Add</button>
+        </div>
+        {% if b.board %}
+          {% for m in b.board | sort(attribute='order') %}
+          <div class="member-row">
+            <div class="move-col">
+              <form method="POST" action="{{ url_for('admin_move_board_member', bid=b.id, mid=m.id, direction='up') }}">
+                <button class="move-btn" type="submit">▲</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_move_board_member', bid=b.id, mid=m.id, direction='down') }}">
+                <button class="move-btn" type="submit">▼</button>
+              </form>
+            </div>
+            <div class="member-thumb">
+              {% if m.photo and m.get('photo_visible', true) %}
+                <img src="{{ url_for('static', filename=m.photo) }}" alt="{{ m.name }}"/>
+              {% else %}👤{% endif %}
+            </div>
+            <div class="member-info">
+              <div class="member-name">{{ m.name }}</div>
+              {% if m.role %}<div class="member-role-tag">{{ m.role }}</div>{% endif %}
+            </div>
+            <div class="flex-gap">
+              <button class="a-btn a-btn-ghost a-btn-sm" type="button"
+                onclick="openEditBranchMember(this)"
+                data-bid="{{ b.id }}" data-role-key="board" data-id="{{ m.id }}"
+                data-name="{{ m.name | e }}" data-role="{{ m.role | e }}"
+                data-bio="{{ m.bio | e }}" data-photo="{{ m.photo | e }}"
+                data-photo-visible="{{ '1' if m.get('photo_visible', true) else '0' }}"
+                data-socials="{{ m.get('socials', []) | tojson | e }}">✏️ Edit</button>
+              <form method="POST" action="{{ url_for('admin_delete_board_member', bid=b.id, mid=m.id) }}"
+                    onsubmit="return confirm('Delete {{ m.name | e }}?')">
+                <button class="a-btn a-btn-danger a-btn-sm" type="submit">🗑</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-row">No board members yet.</div>
+        {% endif %}
+      </div>
+
+      {# Volunteers #}
+      <div class="branch-section">
+        <div class="branch-section-head">
+          <div class="branch-section-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Volunteers
+          </div>
+          <button class="a-btn a-btn-ghost a-btn-sm" type="button"
+            onclick="openAddBranchMember('{{ b.id }}','volunteers','{{ b.name | e }}')">+ Add</button>
+        </div>
+        {% if b.volunteers %}
+          {% for m in b.volunteers | sort(attribute='order') %}
+          <div class="member-row">
+            <div class="move-col">
+              <form method="POST" action="{{ url_for('admin_move_branch_volunteer', bid=b.id, mid=m.id, direction='up') }}">
+                <button class="move-btn" type="submit">▲</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_move_branch_volunteer', bid=b.id, mid=m.id, direction='down') }}">
+                <button class="move-btn" type="submit">▼</button>
+              </form>
+            </div>
+            <div class="member-thumb">
+              {% if m.photo and m.get('photo_visible', true) %}
+                <img src="{{ url_for('static', filename=m.photo) }}" alt="{{ m.name }}"/>
+              {% else %}👤{% endif %}
+            </div>
+            <div class="member-info">
+              <div class="member-name">{{ m.name }}</div>
+              {% if m.role %}<div class="member-role-tag">{{ m.role }}</div>{% endif %}
+            </div>
+            <div class="flex-gap">
+              <button class="a-btn a-btn-ghost a-btn-sm" type="button"
+                onclick="openEditBranchMember(this)"
+                data-bid="{{ b.id }}" data-role-key="volunteers" data-id="{{ m.id }}"
+                data-name="{{ m.name | e }}" data-role="{{ m.role | e }}"
+                data-bio="{{ m.bio | e }}" data-photo="{{ m.photo | e }}"
+                data-photo-visible="{{ '1' if m.get('photo_visible', true) else '0' }}"
+                data-socials="{{ m.get('socials', []) | tojson | e }}">✏️ Edit</button>
+              <form method="POST" action="{{ url_for('admin_delete_branch_volunteer', bid=b.id, mid=m.id) }}"
+                    onsubmit="return confirm('Delete {{ m.name | e }}?')">
+                <button class="a-btn a-btn-danger a-btn-sm" type="submit">🗑</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-row">No volunteers yet.</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+  {% endfor %}
+{% else %}
+<div class="a-card">
+  <div class="empty-state" style="padding:2.5rem">
+    <div class="empty-state-icon">🗺️</div>
+    <p>No branches yet. Click "+ Add Branch" to create the first one.</p>
+  </div>
+</div>
+{% endif %}
+
+
+{# ═══════════════════════════════════════════
+   MODALS — all style="display:none"
+═══════════════════════════════════════════ #}
+
+{# Add Main Member #}
+<div class="modal-backdrop" id="modal-add-main" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">Add Member — Kadam SOS Foundation</div>
+    <form method="POST" action="{{ url_for('admin_add_main_member') }}" enctype="multipart/form-data">
+      {{ member_form_fields('am') }}
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary">Add Member</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-add-main').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# Edit Main Member #}
+<div class="modal-backdrop" id="modal-edit-main" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="edit-main-title">Edit Member</div>
+    <form id="form-edit-main" method="POST" action="" enctype="multipart/form-data">
+      {{ member_form_fields('em') }}
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary">Save Changes</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-edit-main').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# Add Branch #}
+<div class="modal-backdrop" id="modal-add-branch" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">Add Branch</div>
+    <form method="POST" action="{{ url_for('admin_add_branch') }}">
+      <div class="a-form-group">
+        <label>Branch Name *</label>
+        <input class="a-input" type="text" name="name" placeholder="e.g. Bhopal Chapter" required/>
+      </div>
+      <div class="a-form-group">
+        <label>City *</label>
+        <input class="a-input" type="text" name="city" placeholder="e.g. Bhopal" required/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="a-form-group">
+          <label>Latitude *</label>
+          <input class="a-input" type="number" step="any" name="lat" placeholder="23.2599" required/>
+        </div>
+        <div class="a-form-group">
+          <label>Longitude *</label>
+          <input class="a-input" type="number" step="any" name="lng" placeholder="77.4126" required/>
+        </div>
+      </div>
+      <div class="a-input-hint" style="margin-bottom:1rem">
+        🔍 Get coordinates from <a href="https://www.latlong.net" target="_blank" style="color:var(--accent)">latlong.net</a>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary">Add Branch</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-add-branch').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# Edit Branch #}
+<div class="modal-backdrop" id="modal-edit-branch" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="edit-branch-title">Edit Branch</div>
+    <form id="form-edit-branch" method="POST" action="">
+      <div class="a-form-group">
+        <label>Branch Name *</label>
+        <input class="a-input" type="text" name="name" id="eb-name" required/>
+      </div>
+      <div class="a-form-group">
+        <label>City *</label>
+        <input class="a-input" type="text" name="city" id="eb-city" required/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="a-form-group">
+          <label>Latitude *</label>
+          <input class="a-input" type="number" step="any" name="lat" id="eb-lat" required/>
+        </div>
+        <div class="a-form-group">
+          <label>Longitude *</label>
+          <input class="a-input" type="number" step="any" name="lng" id="eb-lng" required/>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary">Save Changes</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-edit-branch').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# Add / Edit Branch Member #}
+<div class="modal-backdrop" id="modal-branch-member" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="bm-title">Add Member</div>
+    <form id="form-branch-member" method="POST" action="" enctype="multipart/form-data">
+      {{ member_form_fields('bm') }}
+      <div class="modal-actions">
+        <button type="submit" class="a-btn a-btn-primary" id="bm-submit-btn">Add</button>
+        <button type="button" class="a-btn a-btn-ghost"
+                onclick="document.getElementById('modal-branch-member').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+// ── Platform selection ──
+function selectPlatform(prefix, slot, key) {
+  var grid = document.querySelectorAll('#modal-add-main [id^="'+prefix+'-s'+slot+'"], #modal-edit-main [id^="'+prefix+'-s'+slot+'"], #modal-branch-member [id^="'+prefix+'-s'+slot+'"]');
+  // Simpler: query all buttons in the slot's platform grid
+  var allBtns = document.querySelectorAll('[id^="'+prefix+'-s'+slot+'-"]');
+  allBtns.forEach(function(b){ if(b.classList.contains('platform-btn')) b.classList.remove('selected'); });
+  var btn = document.getElementById(prefix+'-s'+slot+'-'+key);
+  if (btn) btn.classList.add('selected');
+  var hidden = document.getElementById(prefix+'-s'+slot+'-platform');
+  if (hidden) hidden.value = key;
+}
+
+// ── Photo preview ──
+function showPreview(input, previewId) {
+  var img = document.getElementById(previewId);
+  if (!img || !input.files || !input.files[0]) return;
+  img.src = URL.createObjectURL(input.files[0]);
+  img.style.display = 'block';
+}
+
+// ── Fill any member form by prefix ──
+function fillForm(prefix, data) {
+  function v(id, val){ var e=document.getElementById(id); if(e) e.value=val||''; }
+  function c(id, val){ var e=document.getElementById(id); if(e) e.checked=!!val; }
+
+  v(prefix+'-name', data.name);
+  v(prefix+'-role', data.role);
+  v(prefix+'-bio',  data.bio);
+  c(prefix+'-photo-vis', data.photo_visible !== false && data.photo_visible !== '0');
+
+  var prev = document.getElementById(prefix+'-photo-prev');
+  if (prev) {
+    if (data.photo) { prev.src='/static/'+data.photo; prev.style.display='block'; }
+    else { prev.src=''; prev.style.display='none'; }
+  }
+
+  // Socials — handle both old object format and new array format
+  var socials = data.socials || [];
+  if (!Array.isArray(socials)) {
+    socials = [
+      {platform: socials.instagram?'instagram':'', url:socials.instagram||'', handle:socials.instagram||'', visible:true},
+      {platform: socials.linkedin ?'linkedin' :'', url:socials.linkedin ||'', handle:socials.linkedin ||'', visible:true}
+    ];
+  }
+  for (var i=0; i<2; i++) {
+    var s = socials[i] || {};
+    var n = i+1;
+    v(prefix+'-s'+n+'-url',    s.url);
+    v(prefix+'-s'+n+'-handle', s.handle);
+    c(prefix+'-s'+n+'-vis',    s.visible !== false);
+    // Deselect all platform buttons for this slot first
+    document.querySelectorAll('[id^="'+prefix+'-s'+n+'-"]').forEach(function(b){
+      if(b.classList && b.classList.contains('platform-btn')) b.classList.remove('selected');
+    });
+    if (s.platform) selectPlatform(prefix, n, s.platform);
+    var hidden = document.getElementById(prefix+'-s'+n+'-platform');
+    if (hidden) hidden.value = s.platform || '';
+  }
+}
+
+function clearForm(prefix) {
+  fillForm(prefix, {name:'',role:'',bio:'',photo:'',photo_visible:true,socials:[]});
+}
+
+// ── Edit main member ──
+function openEditMain(btn) {
+  var d = btn.dataset;
+  document.getElementById('edit-main-title').textContent = 'Edit — ' + d.name;
+  document.getElementById('form-edit-main').action = '/admin/team/members/'+d.id+'/edit';
+  var socials = [];
+  try { socials = JSON.parse(d.socials||'[]'); } catch(e){}
+  fillForm('em', {name:d.name, role:d.role, bio:d.bio, photo:d.photo,
+                  photo_visible:d.photoVisible!=='0', socials:socials});
+  document.getElementById('modal-edit-main').style.display = 'flex';
+}
+
+// ── Edit branch ──
+function openEditBranch(btn) {
+  var d = btn.dataset;
+  document.getElementById('edit-branch-title').textContent = 'Edit Branch — '+d.name;
+  document.getElementById('form-edit-branch').action = '/admin/team/branches/'+d.id+'/edit';
+  document.getElementById('eb-name').value = d.name;
+  document.getElementById('eb-city').value = d.city;
+  document.getElementById('eb-lat').value  = d.lat;
+  document.getElementById('eb-lng').value  = d.lng;
+  document.getElementById('modal-edit-branch').style.display = 'flex';
+}
+
+// ── Add branch member ──
+function openAddBranchMember(bid, roleKey, branchName) {
+  var label = roleKey==='board' ? 'Board Member' : 'Volunteer';
+  document.getElementById('bm-title').textContent     = 'Add '+label+' — '+branchName;
+  document.getElementById('bm-submit-btn').textContent= 'Add '+label;
+  document.getElementById('form-branch-member').action= '/admin/team/branches/'+bid+'/'+roleKey+'/add';
+  clearForm('bm');
+  document.getElementById('modal-branch-member').style.display = 'flex';
+}
+
+// ── Edit branch member ──
+function openEditBranchMember(btn) {
+  var d = btn.dataset;
+  var label = d.roleKey==='board' ? 'Board Member' : 'Volunteer';
+  document.getElementById('bm-title').textContent      = 'Edit '+label+' — '+d.name;
+  document.getElementById('bm-submit-btn').textContent = 'Save Changes';
+  document.getElementById('form-branch-member').action =
+    '/admin/team/branches/'+d.bid+'/'+d.roleKey+'/'+d.id+'/edit';
+  var socials = [];
+  try { socials = JSON.parse(d.socials||'[]'); } catch(e){}
+  fillForm('bm', {name:d.name, role:d.role, bio:d.bio, photo:d.photo,
+                  photo_visible:d.photoVisible!=='0', socials:socials});
+  document.getElementById('modal-branch-member').style.display = 'flex';
+}
+
+// ── Close on backdrop click / Escape ──
+document.querySelectorAll('.modal-backdrop').forEach(function(el){
+  el.addEventListener('click', function(e){ if(e.target===el) el.style.display='none'; });
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape') document.querySelectorAll('.modal-backdrop').forEach(function(el){ el.style.display='none'; });
+});
+</script>
+{% endblock %}
