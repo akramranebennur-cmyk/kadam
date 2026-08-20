@@ -1,0 +1,109 @@
+{
+  "regular_password": "kadam2024",
+  "auth_code": "KADAM@auth",
+  "stats": {
+    "cities": 14,
+    "events": 149,
+    "members": 535,
+    "causes": 5
+  },
+  "instagram_urls": [
+    "",
+    "",
+    ""
+  ],
+  "volunteer_apps": [],
+  "contact_msgs": [],
+  "main_members": [
+    {
+      "id": 3,
+      "order": 1,
+      "name": "Prachi Dwivedi",
+      "role": "Founder",
+      "bio": "Meet Prachi Dwivedi, a social entrepreneur, and a passionate leader. She founded Kadam Foundation (2020), Samanvay Youth Conclave (1000+ participants in August), and serves as CEO of Aatmdhaar, empowering women in rural areas. She also leads as Director of the Covid Patient Help Desk.\r\nAn active member of RSS (Nagar Karwahika) and ABVP (Adhyaksha), she is a certified life coach and an experienced debater with 30+ Youth Parliament & MUN roles. In her free time, she explores photography, capturing memories one click at a time.",
+      "photo": "uploads/d88871825fcd48dba4cfcf0a11c4cc86.png",
+      "photo_visible": true,
+      "socials": [
+        {
+          "platform": "",
+          "url": "",
+          "handle": "",
+          "visible": true
+        },
+        {
+          "platform": "",
+          "url": "",
+          "handle": "",
+          "visible": true
+        }
+      ]
+    }
+  ],
+  "branches": [],
+  "programs": [
+    {
+      "id": 1,
+      "name": "Siksha",
+      "description": "ghggg",
+      "category": "Education",
+      "thumbnail": "uploads/c7e243eed38f41f6868e0ee9c675255f.jpg",
+      "founder_name": "hgghhhhhgghghhh",
+      "founder_statement": "",
+      "position": 1,
+      "content_file": "",
+      "content_type": "",
+      "created_at": "13 Jul 2026"
+    }
+  ],
+  "stories_file": "uploads/stories_29805e0191f9462487fd84e866e45ce7.pdf",
+  "stories_type": "pdf",
+  "instagram_posts": [
+    {
+      "url": "https://www.instagram.com/kadamfoundation_/reel/DWPW4Y5Drbj/",
+      "name": "6 years of Kadam",
+      "thumbnail": "uploads/e795324bd0274c879755043451e01105.png"
+    },
+    {
+      "url": "",
+      "name": "Post 2",
+      "thumbnail": ""
+    },
+    {
+      "url": "",
+      "name": "Post 3",
+      "thumbnail": ""
+    }
+  ],
+  "hero_images": [
+    "uploads/b07d361dfa0f47dd9b131fbafc12b3a1.jpg",
+    "uploads/6092aa4d81a54b09aef13aa6e92ff760.jpg",
+    "uploads/56286ec695d4455e9cf5d553abe3115c.jpg"
+  ],
+  "story_cards": [
+    {
+      "tag": "Education",
+      "title": "Books for Every Child",
+      "excerpt": "Our volunteers distributed stationery and ran interactive sessions with 200+ children in government schools.",
+      "images": [
+        "uploads/d48faf4ceef54120821e368d2819dbce.jpg",
+        "uploads/1167404fc3f34b4f895e2110d23b60d1.jpg"
+      ]
+    },
+    {
+      "tag": "Environment",
+      "title": "Cleaning the Streets of Bhopal",
+      "excerpt": "80+ volunteers joined our city-wide cleanliness drive and planted saplings across public spaces.",
+      "images": [
+        "uploads/1399f68f6bbd441a98b9bae0beb07290.jpg"
+      ]
+    },
+    {
+      "tag": "Women Empowerment",
+      "title": "Skills That Changed Lives",
+      "excerpt": "35 women gained vocational skills and found employment through our workshop program.",
+      "images": [
+        "uploads/093d072ce7084955baffc472ba1c67eb.jpg"
+      ]
+    }
+  ]
+}
