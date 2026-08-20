@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Stories & Impact — Kadam SOS Foundation{% endblock %}
+
+{% block extra_css %}
+<style>
+#stories-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column;
+  background: #000;
+}
+#stories-overlay-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .75rem 1.25rem; background: var(--deep); flex-shrink: 0;
+}
+#stories-overlay-bar span {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--blush);
+}
+#stories-overlay-frame { flex: 1; border: none; width: 100%; background: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if stories_file %}
+{# ── STORIES FILE UPLOADED — show it full screen ── #}
+<div id="stories-overlay">
+  <div id="stories-overlay-bar">
+    <span>Stories &amp; Impact — Kadam SOS Foundation</span>
+    <a href="/" style="background:rgba(245,230,223,.12);border:1px solid rgba(245,230,223,.2);
+       color:var(--blush);border-radius:8px;padding:.4rem .9rem;
+       text-decoration:none;font-size:.82rem;font-weight:600">← Home</a>
+  </div>
+  <iframe id="stories-overlay-frame"
+          src="{{ url_for('static', filename=stories_file) }}"
+          allowfullscreen></iframe>
+</div>
+
+{% else %}
+{# ── NO FILE UPLOADED — placeholder ── #}
+<div class="page-hero">
+  <div class="page-hero-orb page-hero-orb-1"></div>
+  <div class="page-hero-orb page-hero-orb-2"></div>
+  <div class="container">
+    <span class="section-eyebrow">Real Impact</span>
+    <h1 class="section-title" style="color:var(--blush)">Stories That<br>Inspire Change</h1>
+    <p class="section-body" style="color:rgba(245,230,223,.55);margin:0 auto">
+      Our full impact stories are coming soon.
+    </p>
+  </div>
+</div>
+<section class="section" style="background:var(--cream)">
+  <div class="container" style="text-align:center;padding:3rem 0">
+    <div style="font-size:3rem;margin-bottom:1rem;opacity:.4">📖</div>
+    <p style="color:var(--muted)">Stories content will appear here once uploaded from the admin panel.</p>
+  </div>
+</section>
+{% endif %}
+
+{# ══════════════════════════════════════════════════════════
+   OLD STORY CARDS — hidden, preserved for future use
+   To restore: remove the style="display:none" wrapper div
+══════════════════════════════════════════════════════════ #}
+<div style="display:none">
+
+<div class="page-hero">
+  <div class="page-hero-orb page-hero-orb-1"></div>
+  <div class="page-hero-orb page-hero-orb-2"></div>
+  <div class="container">
+    <span class="section-eyebrow">Real Impact</span>
+    <h1 class="section-title" style="color:var(--blush)">Stories That<br>Inspire Change</h1>
+    <p class="section-body" style="color:rgba(245,230,223,.55);margin:0 auto">
+      Every initiative leaves a mark. Here are moments from our journey across India.
+    </p>
+  </div>
+</div>
+
+{% set stories = [
+  {'thumb':'story-thumb-edu','emoji':'🏫','tag':'Education',
+   'title':'Books for Every Child — Bhopal School Visit',
+   'text':'Our volunteers visited three government schools in Bhopal distributing stationery and books to over 200 children, and conducted interactive learning games that made education joyful for students who rarely see extracurricular activity.'},
+  {'thumb':'story-thumb-env','emoji':'🌳','tag':'Environment',
+   'title':'Cleaning the Streets — 80 Volunteers, One Mission',
+   'text':'On a Sunday morning, 80+ Kadam volunteers gathered across multiple zones of Bhopal to clean public spaces, plant saplings, and raise awareness about waste segregation and responsible citizenship.'},
+  {'thumb':'story-thumb-women','emoji':'👩‍🎓','tag':'Women Empowerment',
+   'title':'Skills That Changed Lives — Vocational Workshop',
+   'text':'35 women from underprivileged backgrounds participated in our 3-day vocational skill workshop. By the end, 28 of them had connected with employment opportunities — a life-changing outcome for entire families.'},
+  {'thumb':'story-thumb-animal','emoji':'🐾','tag':'Animal Welfare',
+   'title':'Rescue & Care — Street Animals of Bhopal',
+   'text':'Our animal welfare team conducted a vaccination and feeding camp for street animals in Bhopal, reaching hundreds of animals and working with local volunteers to build a network of community caregivers.'},
+  {'thumb':'story-thumb-youth','emoji':'🧑‍💼','tag':'Youth Welfare',
+   'title':'Youth Leadership Camp — Building Tomorrow\'s Leaders',
+   'text':'A 2-day youth leadership camp brought together 120 young volunteers to develop communication, empathy, and civic responsibility skills — many of them going on to lead their own community initiatives.'},
+  {'thumb':'story-thumb-env','emoji':'🌱','tag':'Environment',
+   'title':'100 Trees, 11 Cities — National Tree Plantation Drive',
+   'text':'On World Environment Day, Kadam teams across all 11 cities simultaneously planted saplings, creating a powerful visual moment of collective action that trended on social media and inspired local communities.'}
+] %}
+
+<section class="section" style="background:var(--cream)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem">
+      {% for s in stories %}
+      <div class="card reveal delay-{{ loop.index % 3 }}">
+        <div class="story-thumb {{ s.thumb }}">{{ s.emoji }}</div>
+        <div class="card-body">
+          <div class="story-tag">{{ s.tag }}</div>
+          <div class="story-title">{{ s.title }}</div>
+          <p class="story-excerpt">{{ s.text }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--blush)">
+  <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center">
+    <div>
+      <span class="section-eyebrow reveal">Follow Along</span>
+      <h2 class="section-title reveal delay-1">149+ moments<br><em>on Instagram</em></h2>
+      <p class="section-body reveal delay-2">
+        Our Instagram is a living diary of Kadam's work — school visits, cleanliness drives, workshops,
+        and the smiling faces that make it all worth it. Follow us to stay updated.
+      </p>
+      <div style="margin-top:2rem" class="reveal delay-3">
+        <a href="https://www.instagram.com/kadamfoundation_" target="_blank" class="btn btn-dark">📸 @kadamfoundation_</a>
+      </div>
+    </div>
+    <div class="reveal-right">
+      <div style="background:var(--deep);border-radius:20px;padding:2.5rem;text-align:center">
+        <div style="font-size:3rem;margin-bottom:1rem">📱</div>
+        <p class="serif" style="font-size:1.4rem;font-style:italic;color:var(--blush);line-height:1.4;margin-bottom:1.5rem">
+          "Real change happens in real places, with real people."
+        </p>
+        <div style="display:flex;justify-content:center;gap:2rem">
+          <div style="text-align:center">
+            <div class="stat-number serif" style="font-size:2rem;color:var(--accent)">149</div>
+            <div style="font-size:.72rem;color:rgba(245,230,223,.45);text-transform:uppercase;letter-spacing:.1em">Posts</div>
+          </div>
+          <div style="text-align:center">
+            <div class="stat-number serif" style="font-size:2rem;color:var(--accent)">535</div>
+            <div style="font-size:.72rem;color:rgba(245,230,223,.45);text-transform:uppercase;letter-spacing:.1em">Followers</div>
+          </div>
+          <div style="text-align:center">
+            <div class="stat-number serif" style="font-size:2rem;color:var(--accent)">11</div>
+            <div style="font-size:.72rem;color:rgba(245,230,223,.45);text-transform:uppercase;letter-spacing:.1em">Cities</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+{# ── END hidden old content ── #}
+
+{% endblock %}

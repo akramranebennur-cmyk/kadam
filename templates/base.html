@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Kadam SOS Foundation — Young steps towards the nation. Education, Women Empowerment, Youth Welfare, Environment & Animal Welfare across 11 cities of India."/>
+  <title>{% block title %}Kadam SOS Foundation{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+  {% block extra_css %}{% endblock %}
+
+  <style>
+    /* ── MOBILE OVERLAY ── */
+    .nav-overlay {
+      position: fixed; inset: 0; z-index: 998;
+      background: var(--deep);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.45s cubic-bezier(0.22,1,0.36,1);
+    }
+    .nav-overlay.open { opacity: 1; pointer-events: all; }
+    .nav-overlay-grain {
+      position: absolute; inset: 0; opacity: 0.04; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+    .nav-overlay-orb { position: absolute; border-radius: 50%; background: var(--taupe); opacity: 0.06; pointer-events: none; }
+    .nav-overlay-orb-1 { width: 380px; height: 380px; top: -100px; right: -80px; }
+    .nav-overlay-orb-2 { width: 220px; height: 220px; bottom: 40px; left: -60px; }
+    .nav-overlay-links {
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.1rem; list-style: none;
+    }
+    .nav-overlay-links li { overflow: hidden; }
+    .nav-overlay-links a {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 7vw, 3rem);
+      font-weight: 700; color: var(--blush);
+      text-decoration: none; letter-spacing: 0.02em;
+      padding: 0.2rem 1rem; text-align: center;
+      transform: translateY(40px); opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s cubic-bezier(0.22,1,0.36,1), color 0.2s;
+      position: relative;
+    }
+    .nav-overlay-links a::after {
+      content: ''; position: absolute; bottom: 4px; left: 50%;
+      transform: translateX(-50%); height: 2px; width: 0;
+      background: var(--accent); transition: width 0.3s cubic-bezier(0.22,1,0.36,1);
+    }
+    .nav-overlay-links a:hover { color: var(--accent); }
+    .nav-overlay-links a:hover::after { width: 60%; }
+    .nav-overlay.open .nav-overlay-links a { transform: translateY(0); opacity: 1; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(1) a { transition-delay: 0.07s; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(2) a { transition-delay: 0.11s; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(3) a { transition-delay: 0.15s; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(4) a { transition-delay: 0.19s; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(5) a { transition-delay: 0.23s; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(6) a { transition-delay: 0.27s; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(7) a { transition-delay: 0.31s; }
+    .nav-overlay.open .nav-overlay-links li:nth-child(8) a { transition-delay: 0.35s; }
+    .nav-overlay-footer {
+      position: absolute; bottom: 2.5rem; left: 0; right: 0;
+      text-align: center; z-index: 2;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.5s 0.42s, transform 0.5s 0.42s;
+    }
+    .nav-overlay.open .nav-overlay-footer { opacity: 1; transform: translateY(0); }
+    .nav-overlay-footer p { font-size: 0.75rem; color: rgba(245,230,223,0.28); letter-spacing: 0.14em; text-transform: uppercase; }
+
+    /* ── HAMBURGER ── */
+    .nav-hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 0.3rem; z-index: 1001;
+      background: none; border: none;
+    }
+    .nav-hamburger span {
+      display: block; width: 26px; height: 2px;
+      background: var(--deep); border-radius: 2px;
+      transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.25s, background 0.3s;
+    }
+    .nav-hamburger.open span { background: var(--blush); }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .nav.scrolled .nav-hamburger.open span { background: var(--blush); }
+
+    /* ── LOGO ── */
+    .nav-logo-img {
+      width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(61,34,24,0.15);
+      transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+    }
+    .nav-logo:hover .nav-logo-img { transform: rotate(-8deg) scale(1.1); }
+
+    @media (max-width: 960px) {
+      .nav-desktop-links { display: none !important; }
+      .nav-hamburger      { display: flex !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- MOBILE OVERLAY -->
+<div class="nav-overlay" id="nav-overlay">
+  <div class="nav-overlay-grain"></div>
+  <div class="nav-overlay-orb nav-overlay-orb-1"></div>
+  <div class="nav-overlay-orb nav-overlay-orb-2"></div>
+  <ul class="nav-overlay-links">
+    <li><a href="/"          onclick="closeNav()">Home</a></li>
+    <li><a href="/about"     onclick="closeNav()">About</a></li>
+    <li><a href="/programs"  onclick="closeNav()">Programs</a></li>
+    <li><a href="/stories"   onclick="closeNav()">Stories</a></li>
+    <li><a href="/team"      onclick="closeNav()">Our Team</a></li>
+    <li><a href="/volunteer" onclick="closeNav()">Volunteer</a></li>
+    <li><a href="/contact"   onclick="closeNav()">Contact</a></li>
+    <li><a href="/donate"    onclick="closeNav()" style="color:var(--accent)">Donate →</a></li>
+  </ul>
+  <div class="nav-overlay-footer"><p>Young steps towards the nation</p></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav" id="navbar">
+  <a class="nav-logo" href="/">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Kadam SOS Foundation" class="nav-logo-img"/>
+    <span class="nav-logo-text">Kadam<span style="color:var(--accent)">.</span></span>
+  </a>
+
+  <ul class="nav-links nav-desktop-links" style="display:flex">
+    <li><a href="/"          {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
+    <li><a href="/about"     {% if request.path == '/about' %}class="active"{% endif %}>About</a></li>
+    <li><a href="/programs"  {% if request.path == '/programs' %}class="active"{% endif %}>Programs</a></li>
+    <li><a href="/stories"   {% if request.path == '/stories' %}class="active"{% endif %}>Stories</a></li>
+    <li><a href="/team"      {% if request.path == '/team' %}class="active"{% endif %}>Our Team</a></li>
+    <li><a href="/volunteer" {% if request.path == '/volunteer' %}class="active"{% endif %}>Volunteer</a></li>
+    <li><a href="/contact"   {% if request.path == '/contact' %}class="active"{% endif %}>Contact</a></li>
+    <li><a href="/donate" class="nav-cta">Donate</a></li>
+  </ul>
+
+  <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+{% block content %}{% endblock %}
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Kadam SOS Foundation"
+               style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(245,230,223,0.12)"/>
+          <div class="footer-brand-name">Kadam SOS Foundation</div>
+        </div>
+        <div class="footer-tagline">Young steps towards the nation</div>
+        <p class="footer-desc">A registered NGO working across 11 cities of India for education, women empowerment, youth welfare, environment &amp; animal welfare.</p>
+        <div class="footer-social">
+          <a class="social-btn" href="https://www.instagram.com/kadamfoundation_" target="_blank" rel="noopener" title="Instagram">📸</a>
+          <a class="social-btn" href="https://forms.gle/gTZReYScQ4okB7z77" target="_blank" rel="noopener" title="Volunteer Form">📝</a>
+          <a class="social-btn" href="/contact" title="Contact Us">✉️</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/programs">Programs</a></li>
+          <li><a href="/stories">Stories</a></li>
+          <li><a href="/team">Our Team</a></li>
+          <li><a href="/volunteer">Volunteer</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/donate">Donate</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Programs</h4>
+        <ul>
+          <li><a href="/programs">📚 Education</a></li>
+          <li><a href="/programs">👩‍💼 Women Empowerment</a></li>
+          <li><a href="/programs">🌱 Youth Welfare</a></li>
+          <li><a href="/programs">🌿 Environment</a></li>
+          <li><a href="/programs">🐾 Animal Welfare</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Get in Touch</h4>
+        <p>📍 Bhopal, Madhya Pradesh<br>India</p>
+        <!-- UPDATE: Replace with real phone -->
+        <p style="margin-top:.75rem">📞 <a href="tel:+910000000000" style="color:rgba(245,230,223,0.5)">+91 XXXXX XXXXX</a></p>
+        <p style="margin-top:.75rem">✉️ <a href="mailto:info@kadamfoundation.org" style="color:rgba(245,230,223,0.5)">info@kadamfoundation.org</a></p>
+        <p style="margin-top:.75rem">📸 <a href="https://www.instagram.com/kadamfoundation_" target="_blank" rel="noopener" style="color:rgba(245,230,223,0.5)">@kadamfoundation_</a></p>
+        <p style="margin-top:.75rem;font-size:.74rem;color:rgba(245,230,223,0.28)">Section 8 · 12A · 80G</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 Kadam SOS Foundation. All rights reserved.</p>
+      <p>Made with ❤️ for a better India</p>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+  const overlay   = document.getElementById('nav-overlay');
+  const hamburger = document.getElementById('hamburger');
+  function openNav()  { overlay.classList.add('open');    hamburger.classList.add('open');    document.body.style.overflow = 'hidden'; }
+  function closeNav() { overlay.classList.remove('open'); hamburger.classList.remove('open'); document.body.style.overflow = ''; }
+  hamburger.addEventListener('click', () => overlay.classList.contains('open') ? closeNav() : openNav());
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

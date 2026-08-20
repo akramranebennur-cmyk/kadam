@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ program.name }} — Kadam SOS Foundation</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { display:flex; flex-direction:column; height:100vh; background:#000; font-family:'DM Sans',sans-serif; }
+    .bar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.75rem 1.25rem; background:#3D2218; flex-shrink:0;
+    }
+    .bar-title { font-size:1rem; font-weight:700; color:#F5E6DF; }
+    .bar-back {
+      background:rgba(245,230,223,.12); border:1px solid rgba(245,230,223,.2);
+      color:#F5E6DF; border-radius:8px; padding:.4rem .9rem;
+      text-decoration:none; font-size:.82rem; font-weight:600;
+    }
+    iframe { flex:1; border:none; width:100%; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <div class="bar-title">{{ program.name }}</div>
+    <a class="bar-back" href="/programs">← Back to Programs</a>
+  </div>
+  <iframe src="{{ url_for('static', filename=program.content_file) }}" allowfullscreen></iframe>
+</body>
+</html>

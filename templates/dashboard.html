@@ -1,0 +1,129 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+{% if is_master %}
+<div class="master-banner">
+  <div class="master-banner-icon">👑</div>
+  <div class="master-banner-text">
+    You're logged in with <strong>Masterkey access</strong>. You have full control including the ability to
+    <a href="{{ url_for('admin_change_authcode') }}" style="color:var(--accent);font-weight:600">change the Auth Code</a>.
+  </div>
+</div>
+{% endif %}
+
+<!-- STAT WIDGETS -->
+<div class="stat-grid">
+  <div class="stat-widget">
+    <div class="stat-widget-icon">🌐</div>
+    <div>
+      <div class="stat-widget-num">{{ stats.cities }}</div>
+      <div class="stat-widget-label">Cities Active</div>
+    </div>
+  </div>
+  <div class="stat-widget">
+    <div class="stat-widget-icon">📅</div>
+    <div>
+      <div class="stat-widget-num">{{ stats.events }}</div>
+      <div class="stat-widget-label">Events Run</div>
+    </div>
+  </div>
+  <div class="stat-widget">
+    <div class="stat-widget-icon">👥</div>
+    <div>
+      <div class="stat-widget-num">{{ stats.members }}</div>
+      <div class="stat-widget-label">Community Members</div>
+    </div>
+  </div>
+  <div class="stat-widget">
+    <div class="stat-widget-icon">🙋</div>
+    <div>
+      <div class="stat-widget-num">{{ volunteer_count }}</div>
+      <div class="stat-widget-label">Volunteer Apps</div>
+    </div>
+  </div>
+  <div class="stat-widget">
+    <div class="stat-widget-icon">✉️</div>
+    <div>
+      <div class="stat-widget-num">{{ contact_count }}</div>
+      <div class="stat-widget-label">Messages</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="grid-2 mb-3">
+
+  <div class="a-card">
+    <div class="a-card-header">
+      <div class="a-card-title">📸 Instagram URLs</div>
+      <a href="{{ url_for('admin_instagram') }}" class="a-btn a-btn-ghost a-btn-sm">Edit →</a>
+    </div>
+    <div class="a-card-body">
+      {% for p in instagram_posts %}
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem">
+        <div class="insta-url-num">{{ loop.index }}</div>
+        <span style="font-size:.82rem;color:var(--muted);word-break:break-all">
+          {% if not p.url %}
+            <span style="color:var(--warning)">⚠ Not set</span>
+          {% else %}
+            {{ p.name or p.url[:50] }}{% if not p.name and p.url|length > 50 %}…{% endif %}
+          {% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="a-card">
+    <div class="a-card-header">
+      <div class="a-card-title">🔔 Pending Actions</div>
+    </div>
+    <div class="a-card-body">
+      {% if unreviewed > 0 %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid rgba(166,139,123,.1)">
+        <span style="font-size:.88rem">🙋 Unreviewed volunteer applications</span>
+        <span class="pill pill-orange">{{ unreviewed }}</span>
+      </div>
+      {% endif %}
+      {% if unread_msgs > 0 %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0">
+        <span style="font-size:.88rem">✉️ Unread contact messages</span>
+        <span class="pill pill-orange">{{ unread_msgs }}</span>
+      </div>
+      {% endif %}
+      {% if unreviewed == 0 and unread_msgs == 0 %}
+      <div class="empty-state" style="padding:1.5rem">
+        <div style="font-size:1.5rem">✅</div>
+        <p>All caught up! Nothing pending.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- QUICK NAV TILES -->
+<div class="grid-3">
+  {% for icon,label,url,desc in [
+    ('📸','Instagram URLs', 'admin_instagram', 'Update the 3 post URLs shown on the website'),
+    ('📊','Edit Stats',     'admin_stats',     'Change cities, events, members displayed on homepage'),
+    ('🙋','Volunteer Apps', 'admin_volunteers','Review and manage volunteer applications'),
+    ('✉️','Messages',       'admin_messages',  'Read and manage contact form submissions'),
+    ('🔑','Change Password','admin_change_password','Update the regular admin password using auth code'),
+    ('🌐','View Website',   'home',            'Open the public-facing Kadam website'),
+  ] %}
+  <a href="{{ url_for(url) }}" {% if url == 'home' %}target="_blank"{% endif %}
+     style="display:block;background:var(--white);border:1px solid rgba(166,139,123,.12);border-radius:var(--radius);padding:1.25rem;transition:transform .2s,box-shadow .2s;text-decoration:none"
+     onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(61,34,24,.1)'"
+     onmouseout="this.style.transform='';this.style.boxShadow=''">
+    <div style="font-size:1.5rem;margin-bottom:.5rem">{{ icon }}</div>
+    <div style="font-weight:600;color:var(--deep);margin-bottom:.25rem">{{ label }}</div>
+    <div style="font-size:.8rem;color:var(--muted)">{{ desc }}</div>
+  </a>
+  {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,1 +1,365 @@
+{% extends "base.html" %}
+{% block title %}Kadam SOS Foundation — Young Steps Towards the Nation{% endblock %}
 
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-carousel">
+    {% if hero_images %}
+      {% for img in hero_images %}
+      <div class="hero-slide {% if loop.first %}active{% endif %}"
+           style="background-image:url('{{ url_for('static', filename=img) }}')"></div>
+      {% endfor %}
+    {% else %}
+      <div class="hero-slide active"
+           style="background:radial-gradient(ellipse at 30% 60%,#5C3526 0%,#3D2218 55%,#1a0a05 100%)"></div>
+    {% endif %}
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">Kadam SOS Foundation</span>
+    <h1 class="hero-title">Young <em>Steps</em><br>Towards the<br>Nation</h1>
+    <p class="hero-subtitle">Education · Women Empowerment · Youth Welfare · Environment · Animal Welfare</p>
+    <div class="hero-ctas">
+      <a href="/donate"    class="btn btn-primary">Support Our Cause</a>
+      <a href="/volunteer" class="btn btn-outline">Join as Volunteer</a>
+    </div>
+  </div>
+  <div class="hero-scroll-indicator"><div class="scroll-bar"></div>scroll</div>
+</section>
+
+<!-- ── STATS ── -->
+<div class="stats-bar" data-live-stats>
+  <div class="container">
+    <div class="stat-item">
+      <div class="stat-number" data-target="{{ stats.cities }}" data-stat="cities">0</div>
+      <div class="stat-label">Cities Across India</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="{{ stats.events }}" data-stat="events">0</div>
+      <div class="stat-label">Events &amp; Activities</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="{{ stats.members }}" data-stat="members">0</div>
+      <div class="stat-label">Community Members</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="{{ stats.causes }}" data-stat="causes">0</div>
+      <div class="stat-label">Cause Areas</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ABOUT ── -->
+<section class="section" style="background:var(--cream)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center">
+      <div class="reveal-left">
+        <div style="background:rgba(196,149,106,0.07);border:1px solid rgba(196,149,106,0.15);border-radius:20px;padding:3rem;position:relative;overflow:hidden">
+          <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(196,149,106,0.05)"></div>
+          <p class="serif" style="font-size:1.55rem;font-weight:600;font-style:italic;color:#F5E6DF;line-height:1.45;position:relative;z-index:1;margin-bottom:2rem">
+            "Every step forward, no matter how small, is a step towards a better nation."
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem;position:relative;z-index:1">
+            <span class="badge">Section 8 Company</span>
+            <span class="badge">12A Certified</span>
+            <span class="badge">80G Approved</span>
+          </div>
+        </div>
+        <div style="margin-top:1rem">
+          <span class="tag">📍 Bhopal HQ</span>
+          <span class="tag">🌏 11 Cities</span>
+          <span class="tag">🇮🇳 Pan-India</span>
+        </div>
+      </div>
+      <div>
+        <span class="section-eyebrow reveal">Who We Are</span>
+        <h2 class="section-title reveal delay-1">Making <em>real change</em>,<br>one step at a time</h2>
+        <p class="section-body reveal delay-2">
+          Kadam SOS Foundation is a registered NGO based in Bhopal, India, working across 11 cities
+          to uplift underprivileged communities through education, women empowerment, youth welfare,
+          environment protection, and animal welfare.
+        </p>
+        <div style="margin-top:2rem" class="reveal delay-3">
+          <a href="/about" class="btn btn-dark">Our Full Story</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WOMEN'S SUPPORT ── -->
+<section class="section" style="background:var(--deep)" id="support">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center">
+      <div>
+        <span class="section-eyebrow reveal">Women's Support</span>
+        <h2 class="section-title reveal delay-1">We're here<br><em>for you</em></h2>
+        <p class="reveal delay-2" style="color:rgba(245,230,223,.6);font-size:1rem;line-height:1.8;margin-bottom:1.5rem">
+          If you or someone you know needs support — whether it's legal aid, safety, empowerment,
+          or just someone to talk to — reach out to us. Every message is read personally and handled
+          with complete confidentiality.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:.75rem" class="reveal delay-3">
+          {% for item in ['All requests are confidential','We respond within 24 hours','Active support in 11 cities','No judgment, only help'] %}
+          <div style="display:flex;align-items:center;gap:.75rem">
+            <span style="width:7px;height:7px;min-width:7px;background:var(--accent);border-radius:50%;display:inline-block"></span>
+            <span style="font-size:.9rem;color:rgba(245,230,223,.65)">{{ item }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-box reveal delay-2">
+        <h3>Send a Support Request</h3>
+        <form id="support-form" novalidate>
+          <div class="form-group">
+            <label>Your Name *</label>
+            <input class="form-input" type="text" name="name" placeholder="Your name" required/>
+          </div>
+          <div class="form-group">
+            <label>Phone or Email *</label>
+            <input class="form-input" type="text" name="contact" placeholder="+91 XXXXX XXXXX or email" required/>
+          </div>
+          <div class="form-group">
+            <label>Type of Issue *</label>
+            <select class="form-select" name="issue" required>
+              <option value="">Select issue type</option>
+              <option value="Safety & Protection">🛡️ Safety &amp; Protection</option>
+              <option value="Legal Aid">⚖️ Legal Aid</option>
+              <option value="Financial Support">💰 Financial Support</option>
+              <option value="Health & Wellbeing">🏥 Health &amp; Wellbeing</option>
+              <option value="Education & Skills">📚 Education &amp; Skills</option>
+              <option value="Employment">💼 Employment</option>
+              <option value="Other">💬 Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Describe Your Situation *</label>
+            <textarea class="form-textarea" name="description"
+                      placeholder="Tell us more about how we can help…" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Send Support Request →</button>
+          <p style="font-size:.75rem;color:rgba(245,230,223,.35);text-align:center;margin-top:.75rem">
+            Your message is completely confidential. We respond within 24 hours.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROGRAMS PREVIEW ── -->
+<section class="section" style="background:var(--blush)">
+  <div class="container">
+    <div class="text-center" style="max-width:560px;margin:0 auto 3rem">
+      <span class="section-eyebrow reveal">What We Do</span>
+      <h2 class="section-title reveal delay-1">Five pillars of<br>our mission</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem">
+      {% for icon,title,desc in [
+        ('📚','Education','Quality learning for underprivileged children.'),
+        ('👩‍💼','Women Empowerment','Skills and support for self-sufficient women.'),
+        ('🌱','Youth Welfare','Mentoring the next generation of leaders.'),
+        ('🌿','Environment','Cleanliness drives and green campaigns.'),
+        ('🐾','Animal Welfare','Care and advocacy for animals.')
+      ] %}
+      <div class="card reveal delay-{{ loop.index }}">
+        <div class="card-body">
+          <div class="program-icon">{{ icon }}</div>
+          <div class="program-title">{{ title }}</div>
+          <p class="program-desc">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center" style="margin-top:2.5rem">
+      <a href="/programs" class="btn btn-ghost reveal">View All Programs →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── INSTAGRAM ── -->
+<section class="section" style="background:var(--cream)" id="instagram-section">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3rem;flex-wrap:wrap;gap:1rem">
+      <div>
+        <span class="section-eyebrow reveal">Latest from Instagram</span>
+        <h2 class="section-title reveal delay-1" style="margin-bottom:0">Follow our<br><em>journey</em></h2>
+      </div>
+      <a href="https://www.instagram.com/kadamfoundation_" target="_blank" rel="noopener"
+         class="btn btn-ghost reveal">📸 @kadamfoundation_ →</a>
+    </div>
+    <div id="insta-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">
+      {% for _ in range(3) %}
+      <div style="border-radius:16px;overflow:hidden;background:var(--blush);aspect-ratio:1/1;animation:skeletonPulse 1.5s ease-in-out infinite alternate"></div>
+      {% endfor %}
+    </div>
+    <div class="text-center" style="margin-top:2rem">
+      <a href="https://www.instagram.com/kadamfoundation_" target="_blank" rel="noopener"
+         class="btn btn-dark">See All Posts on Instagram →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── STORY CARDS ── -->
+<section class="section" style="background:var(--blush)">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3rem;flex-wrap:wrap;gap:1rem">
+      <div>
+        <span class="section-eyebrow reveal">Impact Stories</span>
+        <h2 class="section-title reveal delay-1" style="margin-bottom:0">Real people,<br><em>real change</em></h2>
+      </div>
+      <a href="/stories" class="btn btn-ghost reveal">All Stories →</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem">
+      {% set fallback_emojis = ['🏫','🌳','👩‍🎓'] %}
+      {% for card in story_cards %}
+      <div class="story-img-card reveal delay-{{ loop.index }}">
+        <div class="story-img-carousel" data-card-idx="{{ loop.index0 }}">
+          {% if card.images %}
+            {% for img in card.images %}
+            <div class="story-img-slide {% if loop.first %}active{% endif %}"
+                 style="background-image:url('{{ url_for('static', filename=img) }}')"></div>
+            {% endfor %}
+          {% else %}
+            <div class="story-img-slide active"
+                 style="background:linear-gradient(135deg,rgba(196,149,106,0.1),rgba(61,34,24,0.5))"></div>
+          {% endif %}
+        </div>
+        <div class="story-img-overlay"></div>
+        {% if not card.images %}
+        <div class="story-img-fallback">{{ fallback_emojis[loop.index0] }}</div>
+        {% endif %}
+        <div class="story-img-text">
+          <div class="story-tag">{{ card.tag }}</div>
+          <div class="story-title">{{ card.title }}</div>
+          <p class="story-excerpt">{{ card.excerpt }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="section section-dark">
+  <div class="container text-center" style="max-width:680px">
+    <span class="section-eyebrow reveal">Take Action</span>
+    <h2 class="section-title reveal delay-1">Every step counts.<br><em>Yours can too.</em></h2>
+    <p class="reveal delay-2" style="color:rgba(245,230,223,.55);font-size:1.05rem;line-height:1.8;margin-bottom:2.5rem">
+      Whether you donate, volunteer, or simply spread the word — you're making Kadam's mission possible.
+    </p>
+    <div class="hero-ctas reveal delay-3">
+      <a href="/donate"    class="btn btn-primary">Donate Now</a>
+      <a href="/volunteer" class="btn btn-outline">Become a Volunteer</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+@keyframes skeletonPulse{from{opacity:.6;}to{opacity:.3;}}
+.insta-post-card{border-radius:16px;overflow:hidden;border:1px solid rgba(196,149,106,0.12);background:var(--white);text-decoration:none;display:block;transition:transform .35s cubic-bezier(0.22,1,0.36,1),box-shadow .35s;}
+.insta-post-card:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(0,0,0,.4);}
+.insta-thumb{width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--blush);display:flex;align-items:center;justify-content:center;}
+.insta-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.insta-thumb-placeholder{font-size:2.5rem;color:var(--muted);}
+.insta-caption{padding:.85rem 1rem;font-size:.85rem;font-weight:600;color:#F5E6DF;line-height:1.4;}
+.insta-unconfigured{padding:.85rem 1rem;font-size:.78rem;color:var(--muted);font-style:italic;}
+</style>
+<script>
+// Hero carousel
+(function(){
+  var slides=document.querySelectorAll('.hero-slide');
+  if(slides.length<2)return;
+  var cur=0;
+  setInterval(function(){
+    slides[cur].classList.remove('active');
+    cur=(cur+1)%slides.length;
+    slides[cur].classList.add('active');
+  },5000);
+})();
+
+// Story card carousels (independent, staggered)
+document.querySelectorAll('.story-img-carousel').forEach(function(carousel,idx){
+  var slides=carousel.querySelectorAll('.story-img-slide');
+  if(slides.length<2)return;
+  var cur=0;
+  setTimeout(function(){
+    setInterval(function(){
+      slides[cur].classList.remove('active');
+      cur=(cur+1)%slides.length;
+      slides[cur].classList.add('active');
+    },4000);
+  },idx*1333);
+});
+
+// Instagram grid
+async function loadInstagramPosts(){
+  var grid=document.getElementById('insta-grid');
+  try{
+    var res=await fetch('/api/instagram');
+    var posts=await res.json();
+    grid.innerHTML='';
+    posts.forEach(function(post){
+      var card=document.createElement('a');
+      card.className='insta-post-card reveal';
+      card.href=post.url||'https://www.instagram.com/kadamfoundation_';
+      card.target='_blank';card.rel='noopener';
+      if(!post.configured){
+        card.innerHTML='<div class="insta-thumb"><div class="insta-thumb-placeholder">📸</div></div><div class="insta-unconfigured">Configure in Admin Panel</div>';
+      }else{
+        var th=post.thumbnail?'<img src="/static/'+post.thumbnail+'" alt=""/>':'<div class="insta-thumb-placeholder">📸</div>';
+        card.innerHTML='<div class="insta-thumb">'+th+'</div><div class="insta-caption">'+(post.name||'View on Instagram')+'</div>';
+      }
+      grid.appendChild(card);
+    });
+    document.querySelectorAll('#insta-grid .reveal').forEach(function(el){
+      if(window.revealObserver)window.revealObserver.observe(el);
+    });
+  }catch(e){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2rem;margin-bottom:.75rem">📸</div><p>Could not load posts. <a href="https://www.instagram.com/kadamfoundation_" target="_blank" style="color:var(--accent)">View on Instagram →</a></p></div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var revEls=document.querySelectorAll('.reveal,.reveal-left,.reveal-right');
+  window.revealObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('visible');window.revealObserver.unobserve(e.target);}
+    });
+  },{threshold:0.1});
+  revEls.forEach(function(el){window.revealObserver.observe(el);});
+  loadInstagramPosts();
+
+  var form=document.getElementById('support-form');
+  if(!form)return;
+  form.addEventListener('submit',async function(e){
+    e.preventDefault();
+    var btn=form.querySelector('[type=submit]');
+    btn.disabled=true;btn.textContent='Sending…';
+    var data={
+      name:form.querySelector('[name=name]').value,
+      contact:form.querySelector('[name=contact]').value,
+      issue:form.querySelector('[name=issue]').value,
+      description:form.querySelector('[name=description]').value,
+    };
+    try{
+      var res=await fetch('/api/support',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      var json=await res.json();
+      if(json.success){showToast('✅ '+json.message);form.reset();}
+      else{showToast(json.error||'Something went wrong.','error');}
+    }catch(err){showToast('Network error. Please try again.','error');}
+    finally{btn.disabled=false;btn.textContent='Send Support Request →';}
+  });
+});
+</script>
+{% endblock %}

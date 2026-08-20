@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+{% block title %}Our Team — Kadam SOS Foundation{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+/* ── ALTERNATING MEMBER ROWS ── */
+.team-member-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 380px;
+  border-bottom: 1px solid rgba(166,139,123,.1);
+}
+.team-member-row.reverse { direction: rtl; }
+.team-member-row.reverse > * { direction: ltr; }
+
+.team-member-photo {
+  position: relative; overflow: hidden;
+  background: var(--blush); min-height: 320px;
+}
+.team-member-photo img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .6s cubic-bezier(0.22,1,0.36,1);
+}
+.team-member-row:hover .team-member-photo img { transform: scale(1.04); }
+.team-member-photo-placeholder {
+  width: 100%; height: 100%; min-height: 320px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem; background: var(--blush);
+}
+
+.team-member-content {
+  padding: 3rem 3.5rem;
+  display: flex; flex-direction: column; justify-content: center;
+  background: var(--cream);
+}
+.team-member-row:nth-child(odd)  .team-member-content { background: var(--cream); }
+.team-member-row:nth-child(even) .team-member-content { background: var(--white); }
+
+.team-member-role-badge {
+  display: inline-block;
+  font-size: .65rem; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: .6rem;
+}
+.team-member-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700; color: var(--deep);
+  line-height: 1.2; margin-bottom: .85rem;
+}
+.team-member-bio {
+  font-size: .95rem; color: var(--muted);
+  line-height: 1.75; margin-bottom: 1.5rem;
+  max-width: 420px;
+}
+.team-member-socials { display: flex; gap: .5rem; flex-wrap: wrap; }
+.team-social-link {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .75rem; font-weight: 600; color: var(--muted);
+  background: rgba(166,139,123,.1); border-radius: 50px;
+  padding: .3rem .8rem; text-decoration: none;
+  transition: background .2s, color .2s;
+}
+.team-social-link:hover { background: var(--accent); color: var(--deep); }
+.team-social-link svg { width: 14px; height: 14px; }
+
+/* ── MAP ── */
+#india-map { height: 480px; border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(166,139,123,.15); box-shadow: 0 8px 40px rgba(61,34,24,.1); }
+.kadam-pin {
+  background: var(--deep, #3D2218); border: 3px solid #C4956A;
+  border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  width: 24px; height: 24px; box-shadow: 0 4px 12px rgba(61,34,24,.35);
+  cursor: pointer;
+}
+
+/* ── BRANCH VIEW ── */
+#branch-view { display: none; animation: fadeIn .4s cubic-bezier(0.22,1,0.36,1); }
+#branch-view.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+.branch-back-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-size: .85rem; font-weight: 600; color: var(--accent);
+  background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 1.5rem;
+}
+.branch-back-btn:hover { gap: .8rem; }
+
+/* ── BRANCH VOLUNTEERS GRID ── */
+.vol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+.vol-card {
+  background: var(--white); border-radius: 14px;
+  border: 1px solid rgba(166,139,123,.12); overflow: hidden;
+  transition: transform .3s, box-shadow .3s;
+}
+.vol-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(61,34,24,.08); }
+.vol-thumb {
+  width: 100%; aspect-ratio: 1/1; object-fit: cover;
+  background: var(--blush); display: flex; align-items: center;
+  justify-content: center; font-size: 2.5rem;
+}
+.vol-thumb img { width:100%;height:100%;object-fit:cover;display:block; }
+.vol-info { padding: 1rem; }
+.vol-name { font-weight: 700; color: var(--deep); font-size: .9rem; margin-bottom: .2rem; }
+.vol-role { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+
+@media (max-width: 768px) {
+  .team-member-row, .team-member-row.reverse { grid-template-columns: 1fr; direction: ltr; }
+  .team-member-photo { min-height: 260px; }
+  .team-member-content { padding: 2rem 1.5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-orb page-hero-orb-1"></div>
+  <div class="page-hero-orb page-hero-orb-2"></div>
+  <div class="container">
+    <span class="section-eyebrow">The People Behind Kadam</span>
+    <h1 class="section-title" style="color:var(--blush)">Our Team</h1>
+    <p class="section-body" style="color:rgba(245,230,223,.55);margin:0 auto">
+      Meet the passionate individuals driving Kadam SOS Foundation's mission across India.
+    </p>
+  </div>
+</div>
+
+<!-- MAIN BODY MEMBERS -->
+{% if main_members %}
+<section style="background:var(--cream)">
+  <div class="container" style="padding:3rem 0 0">
+    <div class="text-center" style="padding:3rem 2rem 2rem">
+      <span class="section-eyebrow">Leadership</span>
+      <h2 class="section-title">Kadam SOS Foundation<br><em>Main Body</em></h2>
+    </div>
+  </div>
+
+  {% for m in main_members %}
+  {% set is_reverse = loop.index % 2 == 0 %}
+  <div class="team-member-row {{ 'reverse' if is_reverse else '' }} reveal">
+
+    <div class="team-member-photo">
+      {% if m.photo and m.get('photo_visible', true) %}
+        <img src="{{ url_for('static', filename=m.photo) }}" alt="{{ m.name }}"/>
+      {% else %}
+        <div class="team-member-photo-placeholder">👤</div>
+      {% endif %}
+    </div>
+
+    <div class="team-member-content">
+      {% if m.role %}<div class="team-member-role-badge">{{ m.role }}</div>{% endif %}
+      <h3 class="team-member-name">{{ m.name }}</h3>
+      {% if m.bio %}<p class="team-member-bio">{{ m.bio }}</p>{% endif %}
+      {% set socials = m.get('socials', []) %}
+      {% if socials %}
+      <div class="team-member-socials">
+        {% for s in socials %}
+          {% if s.get('visible', true) and s.get('url') %}
+          <a class="team-social-link" href="{{ s.url }}" target="_blank" rel="noopener">
+            {% if s.platform == 'instagram' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+            {% elif s.platform == 'linkedin' %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            {% elif s.platform == 'twitter' %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            {% elif s.platform == 'youtube' %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="#fff" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+            {% else %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            {% endif %}
+            {{ s.handle or s.url[:30] }}
+          </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endfor %}
+</section>
+
+{% else %}
+<section class="section" style="background:var(--cream)">
+  <div class="container" style="text-align:center;padding:3rem 0">
+    <div style="font-size:3rem;margin-bottom:1rem;opacity:.4">👥</div>
+    <p style="color:var(--muted)">Team members will appear here once added from the admin panel.</p>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- MAP + BRANCHES -->
+<section class="section" style="background:var(--blush)" id="branches-section">
+  <div class="container">
+    <div class="text-center" style="max-width:560px;margin:0 auto 3rem">
+      <span class="section-eyebrow reveal">Our Presence</span>
+      <h2 class="section-title reveal delay-1">Find us<br><em>across India</em></h2>
+      <p class="section-body reveal delay-2">Click any pin to explore that branch's team.</p>
+    </div>
+
+    <!-- MAP -->
+    <div id="map-container" class="reveal">
+      {% if branches %}
+      <div id="india-map"></div>
+      {% else %}
+      <div style="height:300px;border-radius:20px;background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(166,139,123,.15);color:var(--muted)">
+        <div style="font-size:3rem;margin-bottom:1rem;opacity:.4">🗺️</div>
+        <p>Branch locations will appear once added from the admin panel.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- BRANCH VIEW -->
+    <div id="branch-view">
+      <button class="branch-back-btn" onclick="showMap()">← Back to Map</button>
+      <div style="margin-bottom:2.5rem">
+        <span class="section-eyebrow" id="branch-city-label"></span>
+        <h2 class="section-title" id="branch-name-label" style="margin-bottom:0"></h2>
+      </div>
+
+      <!-- Branch board — alternating layout, rendered by JS -->
+      <div id="branch-board-section" style="margin-bottom:3rem">
+        <div style="font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem">Board Members</div>
+        <div id="branch-board-rows"></div>
+      </div>
+
+      <!-- Branch volunteers — grid -->
+      <div id="branch-vol-section">
+        <div style="font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem">Volunteers</div>
+        <div class="vol-grid" id="branch-vol-grid"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const branches = {{ branches | tojson }};
+
+// ── Map init ──
+var map = null;
+function initMap() {
+  if (!branches.length || !document.getElementById('india-map')) return;
+  map = L.map('india-map', { center:[22.5,82], zoom:5, scrollWheelZoom:false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom:18
+  }).addTo(map);
+  var pinIcon = L.divIcon({ className:'', html:'<div class="kadam-pin"></div>', iconSize:[24,24], iconAnchor:[12,24], popupAnchor:[0,-28] });
+  branches.forEach(function(b) {
+    var m = L.marker([b.lat, b.lng], {icon:pinIcon}).addTo(map);
+    m.bindTooltip('<strong>'+b.name+'</strong><br><span style="font-size:.8rem;color:#888">'+b.city+'</span>', {direction:'top',offset:[0,-28]});
+    m.on('click', function(){ showBranch(b); });
+  });
+}
+
+// ── Social link HTML ──
+function socialHTML(socials) {
+  if (!socials || !socials.length) return '';
+  var icons = {
+    instagram: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
+    linkedin:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
+    twitter:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+  };
+  return socials.filter(function(s){ return s.visible !== false && s.url; })
+    .map(function(s) {
+      var icon = icons[s.platform] || '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>';
+      return '<a class="team-social-link" href="'+s.url+'" target="_blank" rel="noopener">'+icon+(s.handle||'Link')+'</a>';
+    }).join('');
+}
+
+// ── Alternating member row HTML ──
+function memberRowHTML(m, idx) {
+  var isReverse = idx % 2 === 1;
+  var photoHTML = (m.photo && m.photo_visible !== false)
+    ? '<img src="/static/'+m.photo+'" alt="'+m.name+'" style="width:100%;height:100%;object-fit:cover;display:block"/>'
+    : '<div class="team-member-photo-placeholder">👤</div>';
+  var socHTML = socialHTML(m.socials || []);
+  return '<div class="team-member-row '+(isReverse?'reverse':'')+'">'
+    + '<div class="team-member-photo">'+photoHTML+'</div>'
+    + '<div class="team-member-content">'
+    + (m.role ? '<div class="team-member-role-badge">'+m.role+'</div>' : '')
+    + '<h3 class="team-member-name">'+m.name+'</h3>'
+    + (m.bio ? '<p class="team-member-bio">'+m.bio+'</p>' : '')
+    + (socHTML ? '<div class="team-member-socials">'+socHTML+'</div>' : '')
+    + '</div></div>';
+}
+
+// ── Volunteer card HTML ──
+function volCardHTML(m) {
+  var photoHTML = (m.photo && m.photo_visible !== false)
+    ? '<img src="/static/'+m.photo+'" alt="'+m.name+'"/>'
+    : '<div class="vol-thumb" style="display:flex;align-items:center;justify-content:center;font-size:2.5rem;aspect-ratio:1/1;background:var(--blush)">👤</div>';
+  return '<div class="vol-card">'
+    + '<div class="vol-thumb">'+photoHTML+'</div>'
+    + '<div class="vol-info"><div class="vol-name">'+m.name+'</div>'
+    + (m.role ? '<div class="vol-role">'+m.role+'</div>' : '')+'</div></div>';
+}
+
+// ── Show branch ──
+function showBranch(branch) {
+  document.getElementById('map-container').style.display = 'none';
+  var bv = document.getElementById('branch-view');
+  bv.classList.add('active');
+  document.getElementById('branch-city-label').textContent = branch.city;
+  document.getElementById('branch-name-label').textContent = branch.name;
+
+  var boardRows = document.getElementById('branch-board-rows');
+  var boardSec  = document.getElementById('branch-board-section');
+  var volGrid   = document.getElementById('branch-vol-grid');
+  var volSec    = document.getElementById('branch-vol-section');
+
+  if (branch.board && branch.board.length) {
+    boardRows.innerHTML = branch.board.map(function(m,i){ return memberRowHTML(m,i); }).join('');
+    boardSec.style.display = 'block';
+  } else {
+    boardRows.innerHTML = '<p style="color:var(--muted);font-size:.88rem">No board members listed for this branch.</p>';
+    boardSec.style.display = 'block';
+  }
+
+  if (branch.volunteers && branch.volunteers.length) {
+    volGrid.innerHTML = branch.volunteers.map(volCardHTML).join('');
+    volSec.style.display = 'block';
+  } else {
+    volSec.style.display = 'none';
+  }
+
+  document.getElementById('branches-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function showMap() {
+  document.getElementById('branch-view').classList.remove('active');
+  document.getElementById('map-container').style.display = 'block';
+  if (map) setTimeout(function(){ map.invalidateSize(); }, 50);
+}
+
+document.addEventListener('DOMContentLoaded', initMap);
+</script>
+{% endblock %}
